@@ -26,7 +26,13 @@ def init_save_path(origin_map_path):
     return save_path
 
 if __name__ == "__main__":
+
+    # Step 0: Install dependencies
+    # run setup.sh
+
+    # Step1: Get DAQ score
     params = argparser()
+
     if params['mode']==0:
         choose = params['gpu']
         if choose is not None:
@@ -158,3 +164,6 @@ if __name__ == "__main__":
         print("-"*100)
         print("spectrum b, red_white_blue,  all, -1,1")
         print("-"*100)
+
+    # Step2:  Modeling Part (by ColabFold)
+
