@@ -8,7 +8,7 @@ ENV_PATH="/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine"
 # Create Conda environment at the desired location
 module load miniconda38
 conda create --prefix $ENV_PATH python=3.8 -y
-source activate $ENV_PATH
+conda activate $ENV_PATH
 
 # Make sure your conda environment's bin is in PATH
 export PATH=$ENV_PATH/bin:$PATH
