@@ -4,7 +4,7 @@ echo "Installation and setup start."
 
 # Create Conda environment
 # conda create -n daq_refine python=3.8 -y
-conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/emweb_env
+conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine
 
 # Step 1: Download and extract MAXIT
 wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
