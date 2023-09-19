@@ -1,5 +1,11 @@
 #!/bin/bash
+
 echo "Installation and setup start."
+
+# Create Conda environment
+# conda create -n daq_refine python=3.8 -y
+conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/emweb_env
+
 # Step 1: Download and extract MAXIT
 wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
 tar -xzf maxit-v11.100-prod-src.tar.gz
@@ -13,9 +19,10 @@ cd $RCSBROOT
 # Fetch from kiharalab (based on your Python code)
 curl -s 'https://kiharalab.org/emsuites/daq_refine_count.php?pwd=daq_dklab' > /dev/null
 
-# Step 3: Install Dependencies
-sudo apt-get update
-sudo apt-get install -y bison flex csh bash-completion
+# Step 3: Install Dependencies using Conda (some packages might not be available in Conda so you might need to revert to apt-get or find alternatives)
+conda install -c anaconda bison flex -y
+conda install -c conda-forge csh -y
+# bash-completion might not be available via conda. You may need to install it globally or find an alternative.
 
 # Step 4: Compile MAXIT
 make binary
