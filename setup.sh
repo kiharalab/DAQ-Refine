@@ -6,6 +6,7 @@ echo "Installation and setup start."
 ENV_PATH="/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine"
 
 # Create Conda environment at the desired location
+module load miniconda38
 conda create --prefix $ENV_PATH python=3.8 -y
 source activate $ENV_PATH
 
