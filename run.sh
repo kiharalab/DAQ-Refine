@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "INFO : DAQ-refine started"
 
-cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine"
+cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ"
 #source /etc/profile.d/modules.sh
 module load miniconda38
 
