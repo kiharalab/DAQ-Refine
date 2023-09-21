@@ -52,10 +52,10 @@ def TrimDAQ(filename,cutoff,outfile):
 # rand_letters = string.ascii_lowercase
 # rand_letters = ''.join(random.choice(rand_letters) for i in range(20))
 # daq_file=''
-# str_mode = "strategy2" #@param ["Vanilla AF2","strategy1","strategy2"]
+# str_mode = "strategy 2" #@param ["Vanilla AF2","strategy 1","strategy 2"]
 
 
-# if str_mode == "strategy1" or str_mode == "strategy2":
+# if str_mode == "strategy 1" or str_mode == "strategy 2":
   # root_dir = os.getcwd()
   # upload_dir = os.path.join(root_dir,rand_letters)
   # if not os.path.exists(upload_dir):
@@ -334,7 +334,7 @@ def save_a3m(file,a3m):
 def msa(args):
     global daq_file, daq_msa
     str_mode = args.str_mode
-    if args.str_mode == "strategy2":
+    if args.str_mode == "strategy 2":
         # print('Please upload MSA file (a3m format)')
 
         # Assume cust_msa_file and pdb_input_path are provided as local paths by the user
@@ -359,6 +359,8 @@ def msa(args):
         filename = os.path.join(args.input_path, 'trimmed_msa.a3m')
         save_a3m(filename, new_a3m)
         daq_msa = filename
+        return daq_msa
+    return
 
 # if str_mode == "strategy2":
 #   root_dir = os.getcwd()
@@ -395,7 +397,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description='STEP-1: Input Protein Sequence and DAQ result file')
 
     # Add arguments
-    parser.add_argument('--str_mode', type=str, default='strategy2',
+    parser.add_argument('--str_mode', type=str, default='strategy 2',
                         help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.',required=True)
     
     parser.add_argument('--query_sequence', type=str, default='',
@@ -436,15 +438,10 @@ if __name__ == '__main__':
     if not input_success:
         print("Exiting due to error in input.")
         exit(1)
-    template_success = prepare_trimmed_template(args)
-    if not template_success:
-        print("Exiting due to error in template preparation.")
-        exit(1)
-    msa_success = msa(args)
-    if not msa_success:
-        print("Exiting due to error in MSA.")
-        exit(1)
-
+    prepare_trimmed_template(args)
+    print("Prepare trimmed template finished.")
+    daq_msa = msa(args)
+    print("MSA finished.(if applicable)")
 
 
     print("Selected strategy mode:", args.str_mode)
