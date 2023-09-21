@@ -10,7 +10,8 @@ import subprocess
 
 from sys import version_info
 python_version = f"{version_info.major}.{version_info.minor}"
-
+maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
+RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin"
 # STEP-1: Input Protein Sequence and DAQ result file
 
 # 1. Select the DAQ-refine strategy:
@@ -90,8 +91,8 @@ def get_input(args):
             return False
 
         try:
-            subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", "1tmp.pdb", "-output", "1tmp.cif", "-o", "1"], check=True)
-            daq_file = args.input_path+'/1tmp.cif'
+            subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", args.input_path+"1tmp.pdb", "-output", args.output_path+"1tmp.cif", "-o", "1"], check=True)
+            daq_file = args.output_path+'/1tmp.cif'
         except subprocess.CalledProcessError as e:
             print(f"Maxit subprocess failed: {e}")
             return False
@@ -427,8 +428,8 @@ def get_arguments():
 
 if __name__ == '__main__':
     args = get_arguments()
-    maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
-    os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
+
+    # os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
     input_success = get_input(args)
     if not input_success:
         print("Exiting due to error in input.")
