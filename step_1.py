@@ -22,7 +22,8 @@ python_version = f"{version_info.major}.{version_info.minor}"
 
 # 3. **If you select Strategy-2**, upload MSA file in **Input data** cell.
 
-
+maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
+os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
 
 def TrimDAQ(filename,cutoff,outfile):
     daq=[]
@@ -395,13 +396,13 @@ def get_arguments():
 
     # Add arguments
     parser.add_argument('--str_mode', type=str, default='strategy2',
-                        help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.')
+                        help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.',required=True)
     
     parser.add_argument('--query_sequence', type=str, default='',
                         help='Input target protein sequence.')
 
     parser.add_argument('--jobname', type=str, default='',
-                        help='Job name for the task.')
+                        help='Job name for the task.',required=True)
     
     parser.add_argument('--num_relax', type=int, default=0,
                         help='Number of models to use.')
@@ -416,10 +417,10 @@ def get_arguments():
                         help='Path to the custom MSA file (if applicable).')
 
     parser.add_argument('--input_path', type=str, default='',
-                        help='Path to the directory of the input files.')
+                        help='Path to the directory of the input files.',required=True)
 
     parser.add_argument('--output_path', type=str, default='',
-                        help='Path to the directory of the output files.')
+                        help='Path to the directory of the output files.',required=True)
 
     args = parser.parse_args()
 
