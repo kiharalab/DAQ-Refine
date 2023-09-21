@@ -11,7 +11,7 @@ import subprocess
 from sys import version_info
 python_version = f"{version_info.major}.{version_info.minor}"
 maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
-RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin"
+RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
 # STEP-1: Input Protein Sequence and DAQ result file
 
 # 1. Select the DAQ-refine strategy:
@@ -430,6 +430,8 @@ if __name__ == '__main__':
     args = get_arguments()
 
     # os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
+    os.environ['RCSBROOT']=RCSBROOT
+    os.environ['PATH'] += ":RCSBROOT$/bin"
     input_success = get_input(args)
     if not input_success:
         print("Exiting due to error in input.")
