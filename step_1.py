@@ -392,8 +392,6 @@ import argparse
 
 def get_arguments():
     parser = argparse.ArgumentParser(description='STEP-1: Input Protein Sequence and DAQ result file')
-    maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
-    os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
 
     # Add arguments
     parser.add_argument('--str_mode', type=str, default='strategy2',
@@ -429,6 +427,8 @@ def get_arguments():
 
 if __name__ == '__main__':
     args = get_arguments()
+    maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
+    os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
     input_success = get_input(args)
     if not input_success:
         print("Exiting due to error in input.")
