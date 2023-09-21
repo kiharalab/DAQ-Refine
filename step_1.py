@@ -22,8 +22,7 @@ python_version = f"{version_info.major}.{version_info.minor}"
 
 # 3. **If you select Strategy-2**, upload MSA file in **Input data** cell.
 
-maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
-os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
+
 
 def TrimDAQ(filename,cutoff,outfile):
     daq=[]
@@ -393,6 +392,8 @@ import argparse
 
 def get_arguments():
     parser = argparse.ArgumentParser(description='STEP-1: Input Protein Sequence and DAQ result file')
+    maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
+    os.environ['PATH'] = f"{os.environ['PATH']}:{maxit_path}"
 
     # Add arguments
     parser.add_argument('--str_mode', type=str, default='strategy2',
