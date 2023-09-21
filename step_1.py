@@ -91,7 +91,7 @@ def get_input(args):
             return False
 
         try:
-            subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", args.input_path+"1tmp.pdb", "-output", args.output_path+"1tmp.cif", "-o", "1"], check=True)
+            subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", args.input_path+"/1tmp.pdb", "-output", args.output_path+"/1tmp.cif", "-o", "1"], check=True)
             daq_file = args.output_path+'/1tmp.cif'
         except subprocess.CalledProcessError as e:
             print(f"Maxit subprocess failed: {e}")
