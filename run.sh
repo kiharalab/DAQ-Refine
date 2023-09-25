@@ -15,12 +15,11 @@ module load miniconda38
 #Inputs
 strategy="$1 $2"
 jobname=$3
-pdb_input_path="${4}/daq_score_w9.pdb"
+pdb_input_path="${5}/daq_score_w9.pdb"
 input_dir=$4
 output_dir=$5
 map=$6
 structure=$7
-# output_dir=$3
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
@@ -37,6 +36,7 @@ conda deactivate  || { echo "Failed to deactivate Conda environment"; exit 1; }
 conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  || { echo "Failed to activate daq_refine environment"; exit 1; }
 echo "INFO: STEP-1 Input Protein Sequence and DAQ result file started"
 
+# echo $pdb_input_path
 python3 step_1.py --str_mode=$strategy --jobname=$jobname --pdb_input_path=$pdb_input_path --input_path=$input_dir --output_path=$output_dir  || { echo "step_1.py failed"; exit 1; }
 
 
