@@ -25,7 +25,7 @@ eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; 
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
 
-echo "$4"
+echo $@
 python3 main.py --mode=0 -F=$map -P=$structure --output=$output_dir --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
 python3 writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
