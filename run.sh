@@ -13,13 +13,13 @@ module load miniconda38
 #export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 #export CUDA_VISIBLE_DEVICES=1
 #Inputs
-strategy=$1
-jobname=$2
-pdb_input_path="${3}/daq_score_w9.pdb"
-input_dir=$3
-output_dir=$4
-map=$5
-structure=$6
+strategy="$1 $2"
+jobname=$3
+pdb_input_path="${4}/daq_score_w9.pdb"
+input_dir=$4
+output_dir=$5
+map=$6
+structure=$7
 # output_dir=$3
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
