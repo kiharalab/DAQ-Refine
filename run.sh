@@ -24,7 +24,7 @@ eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; 
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
 
-echo $@
+# echo $@
 python3 main.py --mode=0 -F=$map -P=$structure --output=$output_dir --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
 python3 writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
@@ -36,7 +36,11 @@ conda deactivate  || { echo "Failed to deactivate Conda environment"; exit 1; }
 conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  || { echo "Failed to activate daq_refine environment"; exit 1; }
 echo "INFO: STEP-1 Input Protein Sequence and DAQ result file started"
 
-# echo $pdb_input_path
+echo $pdb_input_path
+echo $strategy
+echo $jobname
+echo $input_dir
+echo $output_dir
 python3 step_1.py --str_mode=$strategy --jobname=$jobname --pdb_input_path=$pdb_input_path --input_path=$input_dir --output_path=$output_dir  || { echo "step_1.py failed"; exit 1; }
 
 
