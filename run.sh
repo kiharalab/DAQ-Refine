@@ -41,7 +41,7 @@ echo $strategy
 echo $jobname
 echo $input_dir
 echo $output_dir
-python3 step_1.py --str_mode=$strategy --jobname=$jobname --pdb_input_path=$pdb_input_path --input_path=$input_dir --output_path=$output_dir  || { echo "step_1.py failed"; exit 1; }
+python3 step_1.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir"  || { echo "step_1.py failed"; exit 1; }
 
 
 echo "INFO: STEP-1 Input Protein Sequence and DAQ result file Done"
