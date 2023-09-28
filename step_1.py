@@ -3,9 +3,23 @@ import os.path
 import re
 import hashlib
 import random
+import sys
 import string
 import urllib.request
 import subprocess
+import fileinput
+import argparse
+import warnings
+import logging
+from Bio import BiopythonDeprecationWarning
+from pathlib import Path
+import matplotlib.pyplot as plt
+from colabfold.download import download_alphafold_params, default_data_dir
+from colabfold.utils import setup_logging
+from colabfold.batch import get_queries, run, set_model_type
+from colabfold.plot import plot_msa_v2
+from colabfold.colabfold import plot_protein
+import numpy as np
 
 
 from sys import version_info
@@ -24,6 +38,19 @@ RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxi
 # 3. **If you select Strategy-2**, upload MSA file in **Input data** cell.
 
 
+
+def set_working_directory(path):
+    """
+    Set the current working directory to the specified path.
+    
+    Args:
+    - path (str): Path to set as the current working directory.
+    """
+    try:
+        os.chdir(path)
+        print(f"Current working directory set to {path}")
+    except Exception as e:
+        print(f"Error setting working directory: {e}")
 
 def TrimDAQ(filename,cutoff,outfile):
     daq=[]
@@ -78,11 +105,19 @@ def TrimDAQ(filename,cutoff,outfile):
   # os.chdir(root_dir)
 daq_file = ''
 daq_msa = ''
+template_mode= ''
+query_sequence = ''
+use_templates = False
+use_amber = False
+dispaly_images = True
+jobname=''
+queries_path = ''
 def add_hash(x, y):
     return x + "_" + hashlib.sha1(y.encode()).hexdigest()[:5]
 
 def get_input(args):
     global daq_file
+
     if args.str_mode in ("strategy 1", "strategy 2"):
         try:
             TrimDAQ(args.pdb_input_path, 0.0, args.input_path+'/1tmp.pdb')
@@ -114,7 +149,7 @@ def get_input(args):
 #   return x+"_"+hashlib.sha1(y.encode()).hexdigest()[:5]
 
 def prepare_trimmed_template(args):
-    global daq_file, daq_msa
+    global daq_file, daq_msa, template_mode, query_sequence
     # Input target sequence
     query_sequence = 'MGEVTAEEVEKFLDSNVSFAKQYYNLRYRAKVISDLLGPREAAVDFSNYHALNSVEESEIIFDLLRDFQDNLQAEKCVFNVMKKLCFLLQADRMSLFMYRARNGIAELATRLFNVHKDAVLEECLVAPDSEIVFPLDMGVVGHVALSKKIVNVPNTEEDEHFCDFVDTLTEYQTKNILASPIMNGKDVVAIIMVVNKVDGPHFTENDEEILLKYLNFANLIMKVFHLSYLHNCETRRGQILLWSGSKVFEELTDIERQFHKALYTVRAFLNCDRYSVGLLDMTKQKEFFDVWPVLMGEAPPYAGPRTPDGREINFYKVIDYILHGKEDIKVIPNPPPDHWALVSGLPTYVAQNGLICNIMNAPSEDFFAFQKEPLDESGWMIKNVLSMPIVNKKEEIVGVATFYNRKDGKPFDEMDETLMESLTQFLGWSVLNPDTYELMNKLENRKDIFQDMVKYHVKCDNEEIQTILKTREVYGKEPWECEEEELAEILQGELPDADKYEINKFHFSDLPLTELELVKCGIQMYYELKVVDKFHIPQEALVRFMYSLSKGYRRITYHNWRHGFNVGQTMFSLLVTGKLKRYFTDLEALAMVTAAFCHDIDHRGTNNLYQMKSQNPLAKLHGSSILERHHLEFGKTLLRDESLNIFQNLNRRQHEHAIHMMDIAIIATDLALYFKKRTMFQKIVDQSKTYETQQEWTQYMMLDQTRKEIVMAMMMTACDLSAITKPWEVQSKVALLVAAEFWEQGDLERTVLQQNPIPMMDRNKADELPKLQVGFIDFVCTFVYKEFSRFHEEITPMLDGITNNRKEWKALADEYETKMKGLEEEKQKQQAANQAAAGSQHGGKQPGGGPASKSCCVQ'
     # Remove whitespaces
@@ -128,6 +163,8 @@ def prepare_trimmed_template(args):
     basejobname = "".join(jobname.split())
     basejobname = re.sub(r'\W+', '', basejobname)
     jobname = add_hash(basejobname, query_sequence)
+
+    set_working_directory(args.output_path)
 
     while os.path.isfile(f"{jobname}.csv"):
         jobname = add_hash(basejobname, ''.join(random.sample(query_sequence, len(query_sequence))))
@@ -146,43 +183,44 @@ def prepare_trimmed_template(args):
     #This option is only active for Vanilla AF mode.
     #"none" = no template information is used, "pdb70" = detect templates in pdb70, "custom" - upload and search own templates (PDB or mmCIF format, see [notes below](#custom_templates))
     #TODO: add functions for Vanilla AF
-    custom_template_path = f"{jobname}_template"
+    # custom_template_path = f"{jobname}_template"
 
     if str_mode == "strategy 1" or str_mode == "strategy 2":
-        if not os.path.exists(custom_template_path):
-            os.mkdir(custom_template_path)
+        
+        # if not os.path.exists(custom_template_path):
+        #     os.mkdir(custom_template_path)
             
-            use_templates = True
+        use_templates = True
             
-            # Assume daq_file is provided as a local path by the user
-            # daq_file = input("Please enter the local path of your daq_file: ")
-            try:
-                os.rename(daq_file, f"{jobname}_template/1tmp.cif")
-            except FileNotFoundError:
-                print("Could not find daq_file to rename.")
-                return False
+        #     # Assume daq_file is provided as a local path by the user
+            
+        #     try:
+        #         os.rename(daq_file, f"{jobname}_template/1tmp.cif")
+        #     except FileNotFoundError:
+        #         print("Could not find daq_file to rename.")
+        #         return False
 
-            return True
+        #     return True
             
-            template_mode = "custom"
+        template_mode = "custom"
 
-        elif template_mode == "pdb70":
-            use_templates = True
-            custom_template_path = None
+    elif template_mode == "pdb70":
+        use_templates = True
+        # custom_template_path = None
 
-        elif template_mode == "custom":
-            if not os.path.exists(custom_template_path):
-                os.mkdir(custom_template_path)
-            
-            # uploaded_file_path = input("Please enter the local path of the file you wish to upload: ")
-            
-            use_templates = True
-            filename = os.path.basename(uploaded_file_path)
-            os.rename(uploaded_file_path, f"{jobname}_template/{filename}")
+    elif template_mode == "custom":
+        # if not os.path.exists(custom_template_path):
+        #     os.mkdir(custom_template_path)
+        
+        # uploaded_file_path = input("Please enter the local path of the file you wish to upload: ")
+        
+        use_templates = True
+        # filename = os.path.basename(args.)
+        # os.rename(uploaded_file_path, f"{jobname}_template/{filename}")
 
-        else:
-            custom_template_path = None
-            use_templates = False
+    else:
+        custom_template_path = None
+        use_templates = False
 
 #@markdown Input target sequence
 # query_sequence = 'MGEVTAEEVEKFLDSNVSFAKQYYNLRYRAKVISDLLGPREAAVDFSNYHALNSVEESEIIFDLLRDFQDNLQAEKCVFNVMKKLCFLLQADRMSLFMYRARNGIAELATRLFNVHKDAVLEECLVAPDSEIVFPLDMGVVGHVALSKKIVNVPNTEEDEHFCDFVDTLTEYQTKNILASPIMNGKDVVAIIMVVNKVDGPHFTENDEEILLKYLNFANLIMKVFHLSYLHNCETRRGQILLWSGSKVFEELTDIERQFHKALYTVRAFLNCDRYSVGLLDMTKQKEFFDVWPVLMGEAPPYAGPRTPDGREINFYKVIDYILHGKEDIKVIPNPPPDHWALVSGLPTYVAQNGLICNIMNAPSEDFFAFQKEPLDESGWMIKNVLSMPIVNKKEEIVGVATFYNRKDGKPFDEMDETLMESLTQFLGWSVLNPDTYELMNKLENRKDIFQDMVKYHVKCDNEEIQTILKTREVYGKEPWECEEEELAEILQGELPDADKYEINKFHFSDLPLTELELVKCGIQMYYELKVVDKFHIPQEALVRFMYSLSKGYRRITYHNWRHGFNVGQTMFSLLVTGKLKRYFTDLEALAMVTAAFCHDIDHRGTNNLYQMKSQNPLAKLHGSSILERHHLEFGKTLLRDESLNIFQNLNRRQHEHAIHMMDIAIIATDLALYFKKRTMFQKIVDQSKTYETQQEWTQYMMLDQTRKEIVMAMMMTACDLSAITKPWEVQSKVALLVAAEFWEQGDLERTVLQQNPIPMMDRNKADELPKLQVGFIDFVCTFVYKEFSRFHEEITPMLDGITNNRKEWKALADEYETKMKGLEEEKQKQQAANQAAAGSQHGGKQPGGGPASKSCCVQ' #@param {type:"string"}
@@ -332,16 +370,17 @@ def save_a3m(file,a3m):
 
 
 def msa(args):
-    global daq_file, daq_msa
+    global daq_file, daq_msa, template_mode
     str_mode = args.str_mode
+    # pdb_input_path = args.pdb_input_path
     if args.str_mode == "strategy 2":
         # print('Please upload MSA file (a3m format)')
 
         # Assume cust_msa_file and pdb_input_path are provided as local paths by the user
         cust_msa_file = args.cust_msa_file
-        pdb_input_path = args.pdb_input_path
+        # pdb_input_path = args.pdb_input_path
 
-        if not os.path.isfile(pdb_input_path):
+        if not os.path.isfile(args.pdb_input_path):
             print('Cannot find DAQ-score output file!!')
             exit(1)  # Or handle this case differently
         
@@ -356,7 +395,7 @@ def msa(args):
         
         new_a3m = trim_a3m(a3m, daq, good)
         
-        filename = os.path.join(args.input_path, 'trimmed_msa.a3m')
+        filename = os.path.join(args.output_path, 'trimmed_msa.a3m')
         save_a3m(filename, new_a3m)
         daq_msa = filename
         return daq_msa
@@ -390,8 +429,241 @@ def msa(args):
 #     #files.download(filename)
 #   os.chdir(root_dir)
 
+# STEP-2: 
+def msa_settings(args):
+    global daq_msa,query_sequence,queries_path,jobname
+    str_mode = args.str_mode
+    msa_mode = "mmseqs2_uniref_env"
+    pair_mode = "unpaired_paired"
+    jobname = args.jobname
+    set_working_directory(args.output_path)
+    # msa_mode = "mmseqs2_uniref_env" #@param ["mmseqs2_uniref_env", "mmseqs2_uniref","single_sequence","custom"]
+    # pair_mode = "unpaired_paired" #@param ["unpaired_paired","paired","unpaired"] {type:"string"}
+    # #@markdown - "unpaired_paired" = pair sequences from same species + unpaired MSA, "unpaired" = seperate MSA for each chain, "paired" - only use paired sequences.
 
-import argparse
+    if str_mode == "strategy 2":
+        msa_mode = "custom"
+        a3m_file = f"{jobname}.custom.a3m"
+        if not os.path.isfile(a3m_file):
+            custom_msa = daq_msa
+            header = 0
+            # import fileinput
+            for line in fileinput.FileInput(custom_msa,inplace=1):
+                if line.startswith(">"):
+                    header = header + 1
+                if not line.rstrip():
+                    continue
+                if line.startswith(">") == False and header == 1:
+                    query_sequence = line.rstrip()
+                print(line, end='')
+
+            os.rename(custom_msa, a3m_file)
+            queries_path=a3m_file
+            print(f"moving {custom_msa} to {a3m_file}")
+    elif msa_mode.startswith("mmseqs2"):
+        a3m_file = f"{jobname}.a3m"
+    elif msa_mode == "custom":
+        a3m_file = f"{jobname}.custom.a3m"
+        if not os.path.isfile(a3m_file):
+            custom_msa = input("Enter path to the custom MSA file: ")
+            header = 0
+            for line in fileinput.FileInput(custom_msa, inplace=1):
+                if line.startswith(">"):
+                    header += 1
+                if not line.rstrip():
+                    continue
+                if not line.startswith(">") and header == 1:
+                    query_sequence = line.rstrip()
+                print(line, end='')
+            os.rename(custom_msa, a3m_file)
+            queries_path = a3m_file
+            print(f"moving {custom_msa} to {a3m_file}")
+    else:
+        a3m_file = f"{jobname}.single_sequence.a3m"
+        with open(a3m_file, "w") as text_file:
+            # query_sequence = input("Enter query sequence: ")
+            text_file.write(">1\n%s" % query_sequence)
+
+
+    # # decide which a3m to use
+    # if args.str_mode == "strategy 2":
+    # msa_mode = "custom"
+    # a3m_file = f"{jobname}.custom.a3m"
+    # if not os.path.isfile(a3m_file):
+    #     #custom_msa_dict = files.upload()
+    #     #custom_msa = list(custom_msa_dict.keys())[0]
+    #     custom_msa = daq_msa
+    #     header = 0
+    #     import fileinput
+    #     for line in fileinput.FileInput(custom_msa,inplace=1):
+    #     if line.startswith(">"):
+    #         header = header + 1
+    #     if not line.rstrip():
+    #         continue
+    #     if line.startswith(">") == False and header == 1:
+    #         query_sequence = line.rstrip()
+    #     print(line, end='')
+
+    #     os.rename(custom_msa, a3m_file)
+    #     queries_path=a3m_file
+    #     print(f"moving {custom_msa} to {a3m_file}")
+    # elif msa_mode.startswith("mmseqs2"):
+    # a3m_file = f"{jobname}.a3m"
+    # elif msa_mode == "custom":
+    # a3m_file = f"{jobname}.custom.a3m"
+    # if not os.path.isfile(a3m_file):
+    #     custom_msa_dict = files.upload()
+    #     custom_msa = list(custom_msa_dict.keys())[0]
+    #     header = 0
+    #     import fileinput
+    #     for line in fileinput.FileInput(custom_msa,inplace=1):
+    #     if line.startswith(">"):
+    #         header = header + 1
+    #     if not line.rstrip():
+    #         continue
+    #     if line.startswith(">") == False and header == 1:
+    #         query_sequence = line.rstrip()
+    #     print(line, end='')
+
+    #     os.rename(custom_msa, a3m_file)
+    #     queries_path=a3m_file
+    #     print(f"moving {custom_msa} to {a3m_file}")
+    # else:
+    # a3m_file = f"{jobname}.single_sequence.a3m"
+    # with open(a3m_file, "w") as text_file:
+    #     text_file.write(">1\n%s" % query_sequence)
+
+
+# Advanced settings
+def advanced_setting(args):
+    global model_type,num_recycles,recycle_early_stop_tolerance,pairing_strategy,max_msa,num_seeds,use_dropout,save_all,save_recycles,save_to_google_drive,dpi
+    model_type = "auto"
+    num_recycles = "1"
+    recycle_early_stop_tolerance = "auto"
+    pairing_strategy = "greedy"
+
+    #@markdown #### Sample settings
+    #@markdown -  enable dropouts and increase number of seeds to sample predictions from uncertainty of the model.
+    #@markdown -  decrease `max_msa` to increase uncertainity
+    max_msa = "auto" #@param ["auto", "512:1024", "256:512", "64:128", "32:64", "16:32"]
+    num_seeds = 1 #@param [1,2,4,8,16] {type:"raw"}
+    use_dropout = False #@param {type:"boolean"}
+
+    num_recycles = None if num_recycles == "auto" else int(num_recycles)
+    recycle_early_stop_tolerance = None if recycle_early_stop_tolerance == "auto" else float(recycle_early_stop_tolerance)
+    if max_msa == "auto": max_msa = None
+
+    #@markdown #### Save settings
+    save_all = False #@param {type:"boolean"}
+    save_recycles = False #@param {type:"boolean"}
+    save_to_google_drive = False #@param {type:"boolean"}
+    #@markdown -  if the save_to_google_drive option was selected, the result zip will be uploaded to your Google Drive
+    dpi = 200 #@param {type:"integer"}
+    #@markdown - set dpi for image resolution
+
+    # if save_to_google_drive:
+    #     from pydrive.drive import GoogleDrive
+    #     from pydrive.auth import GoogleAuth
+    #     from google.colab import auth
+    #     from oauth2client.client import GoogleCredentials
+    #     auth.authenticate_user()
+    #     gauth = GoogleAuth()
+    #     gauth.credentials = GoogleCredentials.get_application_default()
+    #     drive = GoogleDrive(gauth)
+    #     print("You are logged into Google Drive and are good to go!")
+
+#@title Run Prediction
+
+def input_features_callback(input_features):
+    global display_images
+    if display_images:
+        plot_msa_v2(input_features)
+        plt.show()
+        plt.close()
+
+def prediction_callback(protein_obj, length,prediction_result, input_features, mode):
+    global display_images
+    model_name, relaxed = mode
+
+    if not relaxed:
+        if display_images:
+            fig = plot_protein(protein_obj, Ls=length, dpi=150)
+            plt.show()
+            plt.close()
+
+def prediction(args):
+    global daq_file, daq_msa, template_mode, query_sequence,use_templates,use_amber,python_version,display_images,jobname,queries_path,pair_mode,msa_mode,num_relax,custom_template_path
+    warnings.simplefilter(action='ignore', category=FutureWarning)
+    warnings.simplefilter(action='ignore', category=BiopythonDeprecationWarning)
+    display_images = True #@param {type:"boolean"}
+    
+
+    try:
+        K80_chk = os.popen('nvidia-smi | grep "Tesla K80" | wc -l').read()
+    except:
+        K80_chk = "0"
+    pass
+    if "1" in K80_chk:
+        print("WARNING: found GPU Tesla K80: limited to total length < 1000")
+    if "TF_FORCE_UNIFIED_MEMORY" in os.environ:
+        del os.environ["TF_FORCE_UNIFIED_MEMORY"]
+    if "XLA_PYTHON_CLIENT_MEM_FRACTION" in os.environ:
+        del os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"]
+
+
+    # For some reason we need that to get pdbfixer to import
+    if use_amber and f"/usr/local/lib/python{python_version}/site-packages/" not in sys.path:
+        sys.path.insert(0, f"/usr/local/lib/python{python_version}/site-packages/")
+
+
+
+    result_dir = jobname
+    log_filename = os.path.join(jobname,"log.txt")
+    if not os.path.isfile(log_filename) or 'logging_setup' not in globals():
+        setup_logging(Path(log_filename))
+    logging_setup = True
+
+    queries, is_complex = get_queries(queries_path)
+    model_type = set_model_type(is_complex, model_type)
+
+    if "multimer" in model_type and max_msa is not None:
+        use_cluster_profile = False
+    else:
+        use_cluster_profile = True
+
+    download_alphafold_params(model_type, Path("."))
+    results = run(
+        queries=queries,
+        result_dir=result_dir,
+        use_templates=use_templates,
+        custom_template_path=custom_template_path,
+        num_relax=num_relax,
+        msa_mode=msa_mode,
+        model_type=model_type,
+        num_models=5,
+        num_recycles=num_recycles,
+        recycle_early_stop_tolerance=recycle_early_stop_tolerance,
+        num_seeds=num_seeds,
+        use_dropout=use_dropout,
+        model_order=[1,2,3,4,5],
+        is_complex=is_complex,
+        data_dir=Path("."),
+        keep_existing_results=False,
+        rank_by="auto",
+        pair_mode=pair_mode,
+        pairing_strategy=pairing_strategy,
+        stop_at_score=float(100),
+        prediction_callback=prediction_callback,
+        dpi=dpi,
+        zip_results=False,
+        save_all=save_all,
+        max_msa=max_msa,
+        use_cluster_profile=use_cluster_profile,
+        input_features_callback=input_features_callback,
+        save_recycles=save_recycles,
+    )
+    results_zip = f"{jobname}.result.zip"
+    os.system(f"zip -r {results_zip} {jobname}")
 
 def get_arguments():
     parser = argparse.ArgumentParser(description='STEP-1: Input Protein Sequence and DAQ result file')
@@ -415,7 +687,7 @@ def get_arguments():
     parser.add_argument('--pdb_input_path', type=str, default='',
                         help='Path to the DAQ-score output file (if applicable).')
     
-    parser.add_argument('--cust_msa_path', type=str, default='',
+    parser.add_argument('--cust_msa_path', type=str, default='none',
                         help='Path to the custom MSA file (if applicable).')
 
     parser.add_argument('--input_path', type=str, default='',
@@ -449,5 +721,6 @@ if __name__ == '__main__':
     print("Job ID:", args.jobname)
     print("Number of models to use:", args.num_relax)
     print("Template mode:", args.template_mode)
-    print("Path to DAQ-score output file:", args.pdb_input_path)
-    print("Path to custom MSA file:", args.cust_msa_path)
+    print("Output directory:", args.output_path)
+    # print("Path to DAQ-score output file:", args.pdb_input_path)
+    # print("Path to custom MSA file:", args.cust_msa_path)
