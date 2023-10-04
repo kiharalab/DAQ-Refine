@@ -352,7 +352,7 @@ class ProteinModeling:
                     print(line, end='')
 
                 os.rename(self.custom_msa, self.a3m_file)
-                self.queries_path=a3m_file
+                self.queries_path=self.a3m_file
                 print(f"moving {self.custom_msa} to {self.a3m_file}")
         elif self.msa_mode.startswith("mmseqs2"):
             self.a3m_file = f"{self.jobname}.a3m"
@@ -589,7 +589,7 @@ class ProteinModeling:
         </div>
         """))
     
-    def run_modeling(self, args):
+    def run_modeling(self):
         # Extracted logic for running the modeling process
         os.environ['RCSBROOT']=self.RCSBROOT
         os.environ['PATH'] += ":RCSBROOT$/bin"
@@ -682,7 +682,7 @@ def main():
     )
     
     # Run the modeling process
-    modeling.run_modeling(args)
+    modeling.run_modeling()
 
 if __name__ == '__main__':
     main()
