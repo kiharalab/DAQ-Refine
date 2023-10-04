@@ -25,6 +25,9 @@ import py3Dmol
 import glob
 from colabfold.colabfold import plot_plddt_legend
 from colabfold.colabfold import pymol_color_list, alphabet_list
+from IPython.display import display, HTML
+import base64
+from html import escape
 
 class ProteinModeling:
     def __init__(self,args):
@@ -545,6 +548,46 @@ class ProteinModeling:
         self.show_pdb(self.rank_num, self.show_sidechains, self.show_mainchains, self.color).show()
         if self.color == "lDDT":
             plot_plddt_legend().show()
+
+    def image_to_data_url(self,filename):
+        ext = filename.split('.')[-1]
+        prefix = f'data:image/{ext};base64,'
+        with open(filename, 'rb') as f:
+            img = f.read()
+        return prefix + base64.b64encode(img).decode('utf-8')
+    
+    def display_html(self):
+
+        # see: https://stackoverflow.com/a/53688522
+
+
+        pae = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_pae.png"))
+        cov = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_coverage.png"))
+        plddt = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_plddt.png"))
+        display(HTML(f"""
+        <style>
+        img {{
+            float:left;
+        }}
+        .full {{
+            max-width:100%;
+        }}
+        .half {{
+            max-width:50%;
+        }}
+        @media (max-width:640px) {{
+            .half {{
+            max-width:100%;
+            }}
+        }}
+        </style>
+        <div style="max-width:90%; padding:2em;">
+        <h1>Plots for {escape(self.jobname)}</h1>
+        <img src="{pae}" class="full" />
+        <img src="{cov}" class="half" />
+        <img src="{plddt}" class="half" />
+        </div>
+        """))
     
     def run_modeling(self, args):
         # Extracted logic for running the modeling process
