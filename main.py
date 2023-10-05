@@ -170,13 +170,13 @@ class ProteinModeling:
 
         set_working_directory(self.output_path)
 
-        while os.path.isfile(f"{jobname}.csv"):
-            jobname = self.add_hash(self.basejobname, ''.join(random.sample(self.query_sequence, len(self.query_sequence))))
+        while os.path.isfile(f"{self.jobname}.csv"):
+            self.jobname = self.add_hash(self.basejobname, ''.join(random.sample(self.query_sequence, len(self.query_sequence))))
 
         with open(f"{self.jobname}.csv", "w") as text_file:
             text_file.write(f"id,sequence\n{self.jobname},{self.query_sequence}")
 
-        queries_path = f"{self.jobname}.csv"
+        self.queries_path = f"{self.jobname}.csv"
 
         # Number of models to use
         self.num_relax = int(self.num_relax)
