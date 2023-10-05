@@ -35,7 +35,8 @@ echo "INFO: leave DAQ dir, enter DAQ_refine"
 conda deactivate  || { echo "Failed to deactivate Conda environment"; exit 1; }
 conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  || { echo "Failed to activate daq_refine environment"; exit 1; }
 
-python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir"  || { echo "step_1.py failed"; exit 1; }
+python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir"  || { echo "main.py failed"; exit 1; }
+
 
 
 
