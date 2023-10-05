@@ -185,6 +185,7 @@ class Daqrefine:
 
         if self.str_mode == "strategy 1" or self.str_mode == "strategy 2":
             self.custom_template_path = f"{self.output_path}/template"
+            os.makedirs(self.custom_template_path, exist_ok=True)
                         
             self.use_templates = True
                 
