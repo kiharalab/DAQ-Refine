@@ -419,6 +419,45 @@ class Daqrefine:
         #     drive = GoogleDrive(gauth)
         #     print("You are logged into Google Drive and are good to go!")
     
+    def check_dependencies(self):
+        USE_AMBER = self.use_amber
+        USE_TEMPLATES = self.use_templates
+        PYTHON_VERSION = self.python_version
+
+        set_working_directory('/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine')
+        if not os.path.isfile("COLABFOLD_READY"):
+            print("installing colabfold...")
+            os.system("pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'")
+            os.system("pip install --upgrade dm-haiku")
+            os.system("ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/colabfold colabfold")
+            os.system("ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/alphafold alphafold")
+            # patch for jax > 0.3.25
+            os.system("sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py")
+            os.system("touch COLABFOLD_READY")
+
+        # if USE_AMBER or USE_TEMPLATES:
+        #     if not os.path.isfile("CONDA_READY"):
+        #         print("installing conda...")
+        #         os.system("wget -qnc https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh")
+        #         os.system("bash Mambaforge-Linux-x86_64.sh -bfp /usr/local")
+        #         os.system("conda config --set auto_update_conda false")
+        #         os.system("touch CONDA_READY")
+
+        if USE_TEMPLATES and not os.path.isfile("HH_READY") and USE_AMBER and not os.path.isfile("AMBER_READY"):
+            print("installing hhsuite and amber...")
+            os.system(f"conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 openmm=7.7.0 python='{PYTHON_VERSION}' pdbfixer")
+            os.system("touch HH_READY")
+            os.system("touch AMBER_READY")
+        else:
+            if USE_TEMPLATES and not os.path.isfile("HH_READY"):
+                print("installing hhsuite...")
+                os.system(f"conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 python='{PYTHON_VERSION}'")
+                os.system("touch HH_READY")
+            if USE_AMBER and not os.path.isfile("AMBER_READY"):
+                print("installing amber...")
+                os.system(f"conda install -y -c conda-forge openmm=7.7.0 python='{PYTHON_VERSION}' pdbfixer")
+                os.system("touch AMBER_READY")
+
     def input_features_callback(self,input_features):
         if self.display_images:
             plot_msa_v2(input_features)
@@ -599,24 +638,69 @@ class Daqrefine:
     
     def run_modeling(self):
         # Extracted logic for running the modeling process
-        os.environ['RCSBROOT']=self.RCSBROOT
-        os.environ['PATH'] += ":RCSBROOT$/bin"
-        input_success = self.get_input()
-        if not input_success:
-            print("Exiting due to error in input.")
+        try:
+            # Set environment variables
+            os.environ['RCSBROOT'] = self.RCSBROOT
+            os.environ['PATH'] += ":RCSBROOT$/bin"
+        except Exception as e:
+            print(f"Error setting environment variables: {e}")
             exit(1)
+
+        try:
+            input_success = self.get_input()
+            if not input_success:
+                print("Exiting due to error in input.")
+                exit(1)
+        except Exception as e:
+            print(f"Error in get_input(): {e}")
+            exit(1)
+
         print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
-        self.prepare_trimmed_template()
-        print("Prepare trimmed template finished.")
-        daq_msa = self.msa()
-        print("MSA finished.(if applicable)")
+
+        try:
+            self.prepare_trimmed_template()
+            print("Prepare trimmed template finished.")
+        except Exception as e:
+            print(f"Error in prepare_trimmed_template(): {e}")
+            exit(1)
+
+        try:
+            daq_msa = self.msa()
+            print("MSA finished.(if applicable)")
+        except Exception as e:
+            print(f"Error in msa(): {e}")
+            exit(1)
+
         print("INFO: STEP-1 Input Protein Sequence and DAQ result file Done")
         print("INFO: STEP-2 Modeling Part started")
-        self.msa_settings()
-        print("MSA settings finished.")
-        self.advanced_setting()
-        print("Advanced settings finished.")
-        results = self.prediction()
+
+        try:
+            self.msa_settings()
+            print("MSA settings finished.")
+        except Exception as e:
+            print(f"Error in msa_settings(): {e}")
+            exit(1)
+
+        try:
+            self.advanced_setting()
+            print("Advanced settings finished.")
+        except Exception as e:
+            print(f"Error in advanced_setting(): {e}")
+            exit(1)
+
+        try:
+            self.check_dependencies()
+            print("Install dependencies finished.")
+        except Exception as e:
+            print(f"Error in check_dependencies(): {e}")
+            exit(1)
+
+        try:
+            results = self.prediction()
+        except Exception as e:
+            print(f"Error in prediction(): {e}")
+            exit(1)
+
         print("Prediction finished.")
         print("INFO: STEP-2 Modeling Part Done")
         print("INFO: STEP-3 Modeling Part Started")
