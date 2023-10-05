@@ -29,7 +29,7 @@ from IPython.display import display, HTML
 import base64
 from html import escape
 
-class ProteinModeling:
+class Daqrefine:
     def __init__(self,args):
         # Initialize class variables
 
@@ -84,6 +84,7 @@ class ProteinModeling:
         self.logging_setup = False
         self.queries = ''
         self.is_complex = False
+        self.result_dir = ''
 
         # parameters used in display
         self.rank_num = 1 #@param ["1", "2", "3", "4", "5"] {type:"raw"}
@@ -183,16 +184,17 @@ class ProteinModeling:
         self.use_amber = self.num_relax > 0
 
         if self.str_mode == "strategy 1" or self.str_mode == "strategy 2":
+            self.custom_template_path = f"{self.output_path}/template"
                         
             self.use_templates = True
                 
-            #     # Assume daq_file is provided as a local path by the user
-                
-            #     try:
-            #         os.rename(daq_file, f"{jobname}_template/1tmp.cif")
-            #     except FileNotFoundError:
-            #         print("Could not find daq_file to rename.")
-            #         return False
+            # Assume daq_file is provided as a local path by the user
+            
+            try:
+                os.rename(self.daq_file, f"template/1tmp.cif")
+            except FileNotFoundError:
+                print("Could not find daq_file to rename.")
+                return False
 
             #     return True
                 
@@ -200,9 +202,11 @@ class ProteinModeling:
 
         elif self.template_mode == "pdb70":
             self.use_templates = True
-            # custom_template_path = None
+            self.custom_template_path = None
 
         elif self.template_mode == "custom":
+            self.custom_template_path = f"{self.output_path}/template"
+            # TODO add logic later
             
             self.use_templates = True
 
@@ -432,7 +436,7 @@ class ProteinModeling:
         # Extracted logic for prediction
         warnings.simplefilter(action='ignore', category=FutureWarning)
         warnings.simplefilter(action='ignore', category=BiopythonDeprecationWarning)
-        self.display_images = True #@param {type:"boolean"}
+        self.display_images = False #@param {type:"boolean"}
         
 
         try:
@@ -449,13 +453,15 @@ class ProteinModeling:
 
 
         # For some reason we need that to get pdbfixer to import
-        if self.use_amber and f"/usr/local/lib/python{self.python_version}/site-packages/" not in sys.path:
-            sys.path.insert(0, f"/usr/local/lib/python{self.python_version}/site-packages/")
+        # /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python3.8/site-packages
+        if self.use_amber and f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/" not in sys.path:
+            sys.path.insert(0, f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/")
 
 
 
-        result_dir = self.jobname
-        self.log_filename = os.path.join(self.jobname,"log.txt")
+        self.result_dir = f"{self.output_path}/results"
+        os.makedirs(self.result_dir, exist_ok=True)
+        self.log_filename = os.path.join(self.result_dir,"log.txt")
         if not os.path.isfile(self.log_filename) or 'logging_setup' not in globals():
             setup_logging(Path(self.log_filename))
         self.logging_setup = True
@@ -471,7 +477,7 @@ class ProteinModeling:
         download_alphafold_params(self.model_type, Path("."))
         results = run(
             queries=self.queries,
-            result_dir=result_dir,
+            result_dir=self.result_dir,
             use_templates=self.use_templates,
             custom_template_path=self.custom_template_path,
             num_relax=self.num_relax,
@@ -500,7 +506,7 @@ class ProteinModeling:
             save_recycles=self.save_recycles,
         )
         results_zip = f"{self.jobname}.result.zip"
-        os.system(f"zip -r {results_zip} {self.jobname}")
+        os.system(f"zip -r {results_zip} {self.result_dir}")
         return results
     
     def show_pdb(self,rank_num=1, show_sidechains=False, show_mainchains=False, color="lDDT"):
@@ -677,7 +683,7 @@ def main():
     args = get_arguments()
     
     # Create an instance of the ProteinModeling class
-    modeling = ProteinModeling(
+    modeling = Daqrefine(
         args=args
     )
     
