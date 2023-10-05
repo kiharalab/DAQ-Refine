@@ -28,6 +28,7 @@ from colabfold.colabfold import pymol_color_list, alphabet_list
 from IPython.display import display, HTML
 import base64
 from html import escape
+import torch
 
 class Daqrefine:
     def __init__(self,args):
@@ -439,7 +440,7 @@ class Daqrefine:
         warnings.simplefilter(action='ignore', category=BiopythonDeprecationWarning)
         self.display_images = False #@param {type:"boolean"}
         
-
+        check_gpu_with_torch()
         try:
             self.K80_chk = os.popen('nvidia-smi | grep "Tesla K80" | wc -l').read()
         except:
@@ -630,6 +631,26 @@ class Daqrefine:
         print("Number of models to use:", self.num_relax)
         print("Template mode:", self.template_mode)
         print("Output directory:", self.output_path)
+
+
+
+def check_gpu_with_torch():
+    # Check if GPU is available
+    if torch.cuda.is_available():
+        print("GPU is available!")
+        # Get the name of the GPU
+        print(f"GPU Name: {torch.cuda.get_device_name(0)}")
+        # Get memory information about the GPU
+        total_memory = torch.cuda.get_device_properties(0).total_memory
+        allocated_memory = torch.cuda.memory_allocated()
+        cached_memory = torch.cuda.memory_cached()
+        free_memory = total_memory - allocated_memory - cached_memory
+        print(f"Total Memory: {total_memory / (1024 ** 2)} MB")
+        print(f"Allocated Memory: {allocated_memory / (1024 ** 2)} MB")
+        print(f"Cached Memory: {cached_memory / (1024 ** 2)} MB")
+        print(f"Free Memory: {free_memory / (1024 ** 2)} MB")
+    else:
+        print("GPU is not available.")
 
 def set_working_directory(path):
     """
