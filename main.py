@@ -29,6 +29,9 @@ from IPython.display import display, HTML
 import base64
 from html import escape
 import torch
+import shutil
+from PIL import Image
+
 
 class Daqrefine:
     def __init__(self,args):
@@ -550,6 +553,21 @@ class Daqrefine:
         os.system(f"zip -r {results_zip} {self.result_dir}")
         return results
     
+    def save_image(self, filename):
+        # Define the storage location
+        storage_location = f"{self.output_path}\images"
+        
+        # Create the directory if it doesn't exist
+        if not os.path.exists(storage_location):
+            os.makedirs(storage_location)
+        
+        # Copy the image to the storage location
+        destination_path = os.path.join(storage_location, os.path.basename(filename))
+        shutil.copyfile(filename, destination_path)
+        
+        return destination_path
+    
+    # TODO change the html show way to save figures
     def show_pdb(self,rank_num=1, show_sidechains=False, show_mainchains=False, color="lDDT"):
         self.model_name = f"rank_{rank_num}"
         view = py3Dmol.view(js='https://3dmol.org/build/3Dmol.js',)
@@ -608,9 +626,13 @@ class Daqrefine:
         # see: https://stackoverflow.com/a/53688522
 
 
-        pae = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_pae.png"))
-        cov = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_coverage.png"))
-        plddt = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_plddt.png"))
+        # pae = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_pae.png"))
+        # cov = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_coverage.png"))
+        # plddt = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_plddt.png"))
+
+        pae = self.save_image(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_pae.png"))
+        cov = self.save_image(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_coverage.png"))
+        plddt = self.save_image(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_plddt.png"))
         display(HTML(f"""
         <style>
         img {{
@@ -703,9 +725,9 @@ class Daqrefine:
 
         print("Prediction finished.")
         print("INFO: STEP-2 Modeling Part Done")
-        print("INFO: STEP-3 Modeling Part Started")
+        print("INFO: STEP-3 Save Results Started")
         # self.dispaly_structure(results)
-        print("INFO: STEP-3 Modeling Part Done")
+        print("INFO: STEP-3 Save Results Done")
 
 
         print("======================DAQ-Refine finished==================")

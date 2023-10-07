@@ -37,6 +37,11 @@ conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  
 
 python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir"  || { echo "main.py failed"; exit 1; }
 
+echo "INFO: STEP-4 rerun DAQ started"
+cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ" || { echo "Failed to change directory"; exit 1; }
+# python3 main.py --mode=0 -F=$map -P=$structure --output=$output_dir --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
+# python3 writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
+echo "INFO: STEP-4 rerun DAQ Done"
 
 
