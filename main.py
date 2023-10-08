@@ -546,7 +546,7 @@ class Daqrefine:
             self.use_cluster_profile = True
 
         logging.debug('=====================================DEBUG: PRINT PARAMETERS=====================================')
-        self.print_parameters(self)
+        self.print_parameters()
         logging.debug('=====================================DEBUG: PRINT PARAMETERS=====================================')
 
         download_alphafold_params(self.model_type, Path("."))
