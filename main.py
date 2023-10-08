@@ -440,6 +440,16 @@ class Daqrefine:
                 return True
             except subprocess.CalledProcessError:
                 return False
+        
+        def is_conda_package_installed(package_name):
+            try:
+                result = subprocess.check_output(["conda", "list", package_name], stderr=subprocess.STDOUT, text=True)
+                if package_name in result:
+                    return True
+                else:
+                    return False
+            except subprocess.CalledProcessError:
+                return False
 
         def is_conda_installed():
             try:
@@ -465,14 +475,14 @@ class Daqrefine:
             os.system("bash Miniconda3-latest-Linux-x86_64.sh -bfp /usr/local")
             os.system("conda config --set auto_update_conda false")
 
-        if USE_TEMPLATES and not is_python_module_installed("hhsuite") and USE_AMBER and not is_python_module_installed("amber"):
+        if USE_TEMPLATES and not is_conda_package_installed("hhsuite") and USE_AMBER and not is_conda_package_installed("openmm"):
             print("installing hhsuite and amber...")
             os.system(f"conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 openmm=7.7.0 python='{PYTHON_VERSION}' pdbfixer")
         else:
-            if USE_TEMPLATES and not is_python_module_installed("hhsuite"):
+            if USE_TEMPLATES and not is_conda_package_installed("hhsuite"):
                 print("installing hhsuite...")
                 os.system(f"conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 python='{PYTHON_VERSION}'")
-            if USE_AMBER and not is_python_module_installed("amber"):
+            if USE_AMBER and not is_conda_package_installed("openmm"):
                 print("installing amber...")
                 os.system(f"conda install -y -c conda-forge openmm=7.7.0 python='{PYTHON_VERSION}' pdbfixer")
 
