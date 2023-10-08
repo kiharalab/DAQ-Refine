@@ -36,6 +36,7 @@ import logging
 
 
 
+
 class Daqrefine:
     def __init__(self,args):
         # Initialize class variables
@@ -433,8 +434,23 @@ class Daqrefine:
         USE_TEMPLATES = self.use_templates
         PYTHON_VERSION = self.python_version
 
+        def is_python_module_installed(module_name):
+            try:
+                subprocess.check_call([f"python{PYTHON_VERSION}", "-c", f"import {module_name}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                return True
+            except subprocess.CalledProcessError:
+                return False
+
+        def is_conda_installed():
+            try:
+                subprocess.check_call(["conda", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                return True
+            except subprocess.CalledProcessError:
+                return False
+
         set_working_directory('/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine')
-        if not os.path.isfile("COLABFOLD_READY"):
+
+        if not is_python_module_installed("colabfold"):
             print("installing colabfold...")
             os.system("pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'")
             os.system("pip install --upgrade dm-haiku")
@@ -442,30 +458,23 @@ class Daqrefine:
             os.system(f"ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/alphafold alphafold")
             # patch for jax > 0.3.25
             os.system("sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py")
-            os.system("touch COLABFOLD_READY")
 
-        if USE_AMBER or USE_TEMPLATES:
-            if not os.path.isfile("CONDA_READY"):
-                print("installing conda...")
-                os.system("wget -qnc https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh")
-                os.system("bash Mambaforge-Linux-x86_64.sh -bfp /usr/local")
-                os.system("conda config --set auto_update_conda false")
-                os.system("touch CONDA_READY")
+        if not is_conda_installed():
+            print("installing conda...")
+            os.system("wget -qnc https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh")
+            os.system("bash Miniconda3-latest-Linux-x86_64.sh -bfp /usr/local")
+            os.system("conda config --set auto_update_conda false")
 
-        if USE_TEMPLATES and not os.path.isfile("HH_READY") and USE_AMBER and not os.path.isfile("AMBER_READY"):
+        if USE_TEMPLATES and not is_python_module_installed("hhsuite") and USE_AMBER and not is_python_module_installed("amber"):
             print("installing hhsuite and amber...")
             os.system(f"conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 openmm=7.7.0 python='{PYTHON_VERSION}' pdbfixer")
-            os.system("touch HH_READY")
-            os.system("touch AMBER_READY")
         else:
-            if USE_TEMPLATES and not os.path.isfile("HH_READY"):
+            if USE_TEMPLATES and not is_python_module_installed("hhsuite"):
                 print("installing hhsuite...")
                 os.system(f"conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 python='{PYTHON_VERSION}'")
-                os.system("touch HH_READY")
-            if USE_AMBER and not os.path.isfile("AMBER_READY"):
+            if USE_AMBER and not is_python_module_installed("amber"):
                 print("installing amber...")
                 os.system(f"conda install -y -c conda-forge openmm=7.7.0 python='{PYTHON_VERSION}' pdbfixer")
-                os.system("touch AMBER_READY")
 
     def input_features_callback(self,input_features):
         if self.display_images:
