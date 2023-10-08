@@ -750,8 +750,9 @@ class Daqrefine:
             exit(1)
 
         try:
-            # self.prediction()
+            
             check_gpu_with_torch()
+            self.prediction()
         except Exception as e:
             print(f"Error in prediction(): {e}")
             exit(1)
