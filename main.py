@@ -31,6 +31,9 @@ from html import escape
 import torch
 import shutil
 from PIL import Image
+import logging
+
+
 
 
 class Daqrefine:
@@ -102,6 +105,8 @@ class Daqrefine:
         self.pdb_file = ''
         self.model_name = ''
 
+        logging.basicConfig(filename=f'{self.output_path}\log.txt', level=logging.DEBUG)
+
 
 
 
@@ -109,9 +114,9 @@ class Daqrefine:
     def print_parameters(self):
         # Extracted logic for printing help
         """Prints all the parameters of the instance."""
-        print("Parameters of the ProteinModeling instance:")
+        logging.debug("=================================Parameters of the ProteinModeling instance:=================================")
         for attr, value in self.__dict__.items():
-            print(f"{attr}: {value}")
+            logging.debug(f"{attr}: {value}")
 
         
     
@@ -148,14 +153,14 @@ class Daqrefine:
             try:
                 self.TrimDAQ(self.pdb_input_path, 0.0, self.input_path+'/1tmp.pdb')
             except Exception as e:
-                print(f"Error while trimming DAQ: {e}")
+                logging.debug(f"Error while trimming DAQ: {e}")
                 return False
 
             try:
                 subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.input_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
                 self.daq_file = self.output_path+'/1tmp.cif'
             except subprocess.CalledProcessError as e:
-                print(f"Maxit subprocess failed: {e}")
+                logging.debug(f"Maxit subprocess failed: {e}")
                 return False
 
             return True
@@ -198,7 +203,7 @@ class Daqrefine:
             try:
                 os.rename(self.daq_file, f"template/1tmp.cif")
             except FileNotFoundError:
-                print("Could not find daq_file to rename.")
+                logging.debug("Could not find daq_file to rename.")
                 return False
 
             #     return True
@@ -273,7 +278,7 @@ class Daqrefine:
                     if sco < cutoff:
                         #print(sco)
                         daq.append(resn)
-        print(daq)
+        # print(daq)
         daq2=[]
         for resn in PDB:
             if int(resn) in daq:
@@ -300,7 +305,7 @@ class Daqrefine:
             if int(resn) in daq:
                 continue
             goodpos.append(int(resn))
-        print('HighDAQ',goodpos)
+        # print('HighDAQ',goodpos)
 
         return daq,goodpos
     
@@ -318,7 +323,7 @@ class Daqrefine:
         if self.str_mode == "strategy 2":
 
             if not os.path.isfile(self.pdb_input_path):
-                print('Cannot find DAQ-score output file!!')
+                logging.debug('Cannot find DAQ-score output file!!')
                 exit(1)  # Or handle this case differently
             
             # print(f'User uploaded MSA file at {cust_msa_file}')
@@ -327,7 +332,7 @@ class Daqrefine:
                 a3m = self.ReadA3M(self.cust_msa_path)
                 daq, good = self.ReadDAQ(self.pdb_input_path, 0.0, 0.0)
             except FileNotFoundError:
-                print("MSA file or DAQ-score output file not found.")
+                logging.debug("MSA file or DAQ-score output file not found.")
                 return False
             
             new_a3m = self.trim_a3m(a3m, daq, good)
@@ -358,11 +363,11 @@ class Daqrefine:
                         continue
                     if line.startswith(">") == False and header == 1:
                         self.query_sequence = line.rstrip()
-                    print(line, end='')
+                    # print(line, end='')
 
                 os.rename(self.custom_msa, self.a3m_file)
                 self.queries_path=self.a3m_file
-                print(f"moving {self.custom_msa} to {self.a3m_file}")
+                logging.info(f"moving {self.custom_msa} to {self.a3m_file}")
         elif self.msa_mode.startswith("mmseqs2"):
             self.a3m_file = f"{self.jobname}.a3m"
         elif self.msa_mode == "custom":
@@ -378,10 +383,10 @@ class Daqrefine:
                         continue
                     if not line.startswith(">") and header == 1:
                         query_sequence = line.rstrip()
-                    print(line, end='')
+                    # print(line, end='')
                 os.rename(self.custom_msa, self.a3m_file)
                 self.queries_path = self.a3m_file
-                print(f"moving {self.custom_msa} to {self.a3m_file}")
+                logging.info(f"moving {self.custom_msa} to {self.a3m_file}")
         else:
             self.a3m_file = f"{self.jobname}.single_sequence.a3m"
             with open(self.a3m_file, "w") as text_file:
@@ -483,6 +488,7 @@ class Daqrefine:
         self.display_images = False #@param {type:"boolean"}
         
         check_gpu_with_torch()
+        
         try:
             self.K80_chk = os.popen('nvidia-smi | grep "Tesla K80" | wc -l').read()
         except:
@@ -517,6 +523,10 @@ class Daqrefine:
             self.use_cluster_profile = False
         else:
             self.use_cluster_profile = True
+
+        logging.debug('=====================================DEBUG: PRINT PARAMETERS=====================================')
+        self.print_parameters(self)
+        logging.debug('=====================================DEBUG: PRINT PARAMETERS=====================================')
 
         download_alphafold_params(self.model_type, Path("."))
         results = run(
@@ -678,6 +688,7 @@ class Daqrefine:
             exit(1)
 
         print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
+        # logging.info("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
 
         try:
             self.prepare_trimmed_template()
@@ -687,7 +698,7 @@ class Daqrefine:
             exit(1)
 
         try:
-            daq_msa = self.msa()
+            self.msa()
             print("MSA finished.(if applicable)")
         except Exception as e:
             print(f"Error in msa(): {e}")
