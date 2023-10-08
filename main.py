@@ -106,7 +106,7 @@ class Daqrefine:
         self.pdb_file = ''
         self.model_name = ''
 
-        log_file = os.join(self.output_path, 'log.txt')
+        log_file = os.path.join(self.output_path, 'log.txt')
         logging.basicConfig(filename=log_file, level=logging.DEBUG)
 
 
