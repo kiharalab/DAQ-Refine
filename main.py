@@ -496,6 +496,7 @@ class Daqrefine:
         warnings.simplefilter(action='ignore', category=FutureWarning)
         warnings.simplefilter(action='ignore', category=BiopythonDeprecationWarning)
         self.display_images = False #@param {type:"boolean"}
+        set_working_directory(self.output_path)
         
         check_gpu_with_torch()
         
