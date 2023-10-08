@@ -498,7 +498,7 @@ class Daqrefine:
         self.display_images = False #@param {type:"boolean"}
         set_working_directory(self.output_path)
         
-        check_gpu_with_torch()
+        
         
         try:
             self.K80_chk = os.popen('nvidia-smi | grep "Tesla K80" | wc -l').read()
@@ -740,7 +740,8 @@ class Daqrefine:
             exit(1)
 
         try:
-            results = self.prediction()
+            # self.prediction()
+            check_gpu_with_torch()
         except Exception as e:
             print(f"Error in prediction(): {e}")
             exit(1)
