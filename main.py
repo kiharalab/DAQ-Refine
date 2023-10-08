@@ -105,7 +105,8 @@ class Daqrefine:
         self.pdb_file = ''
         self.model_name = ''
 
-        logging.basicConfig(filename=f'{self.output_path}\log.txt', level=logging.DEBUG)
+        log_file = os.join(self.output_path, 'log.txt')
+        logging.basicConfig(filename=log_file, level=logging.DEBUG)
 
 
 
@@ -443,13 +444,13 @@ class Daqrefine:
             os.system("sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py")
             os.system("touch COLABFOLD_READY")
 
-        # if USE_AMBER or USE_TEMPLATES:
-        #     if not os.path.isfile("CONDA_READY"):
-        #         print("installing conda...")
-        #         os.system("wget -qnc https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh")
-        #         os.system("bash Mambaforge-Linux-x86_64.sh -bfp /usr/local")
-        #         os.system("conda config --set auto_update_conda false")
-        #         os.system("touch CONDA_READY")
+        if USE_AMBER or USE_TEMPLATES:
+            if not os.path.isfile("CONDA_READY"):
+                print("installing conda...")
+                os.system("wget -qnc https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh")
+                os.system("bash Mambaforge-Linux-x86_64.sh -bfp /usr/local")
+                os.system("conda config --set auto_update_conda false")
+                os.system("touch CONDA_READY")
 
         if USE_TEMPLATES and not os.path.isfile("HH_READY") and USE_AMBER and not os.path.isfile("AMBER_READY"):
             print("installing hhsuite and amber...")
