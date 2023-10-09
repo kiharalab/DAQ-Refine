@@ -116,7 +116,7 @@ class Daqrefine:
     def print_parameters(self):
         # Extracted logic for printing help
         """Prints all the parameters of the instance."""
-        logging.debug("=================================Parameters of the ProteinModeling instance:=================================")
+        logging.debug("=================================Parameters of the DaqRefine instance:=================================")
         for attr, value in self.__dict__.items():
             logging.debug(f"{attr}: {value}")
 
@@ -532,7 +532,7 @@ class Daqrefine:
 
         self.result_dir = f"{self.output_path}/results"
         os.makedirs(self.result_dir, exist_ok=True)
-        self.log_filename = os.path.join(self.result_dir,"log.txt")
+        self.log_filename = os.path.join(self.result_dir,"colabfold_log.txt")
         if not os.path.isfile(self.log_filename) or 'logging_setup' not in globals():
             setup_logging(Path(self.log_filename))
         self.logging_setup = True
