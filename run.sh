@@ -29,7 +29,7 @@ CRYOREAD_PYTHON="/apps/miniconda38/envs/cryoread/bin/python3"
 
 # echo $@
 $CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output=$output_dir --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
-$CRYOREAD_PYTHON writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
+# $CRYOREAD_PYTHON writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
 echo "INFO : STEP-0 DAQ-refine Done"
 
@@ -44,14 +44,13 @@ which python3
 
 python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir"  || { echo "main.py failed"; exit 1; }
 
-echo "INFO: STEP-4 rerun DAQ started"
-daqrefined_output_dir="${output_dir}/daq_refined"
-# refined_map="${daqrefined_output_dir}/daq_refined_map.mrc"
-# refined_structure="${daqrefined_output_dir}/daq_refined.pdb"
+echo "INFO: STEP-3 Compute refined DAQ started"
+daqrefined_output_dir="${output_dir}/results"
+refined_structure="${daqrefined_output_dir}/input.pdb"
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ" || { echo "Failed to change directory"; exit 1; }
-# python3 main.py --mode=0 -F=$map -P=$structure --output=$output_daqrefined_output_dirdir --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
-# python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
+python3 main.py --mode=0 -F=$map -P=$refined_structure --output=$output_daqrefined_output_dir --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
+python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
-echo "INFO: STEP-4 rerun DAQ Done"
+echo "INFO: STEP-3 Computer refined DAQ Done"
 
 

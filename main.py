@@ -637,13 +637,16 @@ class Daqrefine:
         self.tag = results["rank"][0][self.rank_num - 1]
         self.jobname_prefix = ".custom" if self.msa_mode == "custom" else ""
         self.pdb_filename = f"{self.jobname}/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb"
+        # os.rename(self.pdb_filename, f"input.pdb")
+        shutil.copy(self.pdb_filename, "input.pdb")
         self.pdb_file = glob.glob(self.pdb_filename)
 
         
 
-        self.show_pdb(self.rank_num, self.show_sidechains, self.show_mainchains, self.color).show()
-        if self.color == "lDDT":
-            plot_plddt_legend().show()
+        # TODO: save figure
+        # self.show_pdb(self.rank_num, self.show_sidechains, self.show_mainchains, self.color).show()
+        # if self.color == "lDDT":
+        #     plot_plddt_legend().show()
 
     def image_to_data_url(self,filename):
         ext = filename.split('.')[-1]
@@ -758,10 +761,13 @@ class Daqrefine:
             exit(1)
 
         print("Prediction finished.")
+        try:
+            self.display_structure(self.results)
+            print("Display structure finished.")
+        except Exception as e:
+            print(f"Error in display_structure(results): {e}")
+
         print("INFO: STEP-2 Modeling Part Done")
-        print("INFO: STEP-3 Save Results Started")
-        # self.dispaly_structure(results)
-        print("INFO: STEP-3 Save Results Done")
 
 
         print("======================DAQ-Refine finished==================")
