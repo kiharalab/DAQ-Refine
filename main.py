@@ -628,6 +628,7 @@ class Daqrefine:
         view.zoomTo()
         return view
     
+    
     def display_structure(self,results):
         self.rank_num = 1 #@param ["1", "2", "3", "4", "5"] {type:"raw"}
         self.color = "lDDT" #@param ["chain", "lDDT", "rainbow"]
@@ -638,7 +639,7 @@ class Daqrefine:
         self.jobname_prefix = ".custom" if self.msa_mode == "custom" else ""
         self.pdb_filename = f"{self.jobname}/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb"
         # os.rename(self.pdb_filename, f"input.pdb")
-        shutil.copy(self.pdb_filename, "input.pdb")
+        
         self.pdb_file = glob.glob(self.pdb_filename)
 
         
@@ -692,6 +693,10 @@ class Daqrefine:
         </div>
         """))
     
+    def align_structure(self):
+        shutil.copy(self.pdb_filename, "input.pdb")
+        
+
     def run_modeling(self):
         # Extracted logic for running the modeling process
         try:
@@ -756,27 +761,37 @@ class Daqrefine:
             
             check_gpu_with_torch()
             self.prediction()
+            print("Prediction finished.")
         except Exception as e:
             print(f"Error in prediction(): {e}")
             exit(1)
 
-        print("Prediction finished.")
+        
         try:
             self.display_structure(self.results)
-            print("Display structure finished.")
+            print("Store structure finished.")
         except Exception as e:
             print(f"Error in display_structure(results): {e}")
+            exit(1)
+        
+        try:
+            self.align_structure()
+            print("Align structure finished.")
+        except Exception as e:
+            print(f"Error in align_structure(): {e}")
+            exit(1)
+
 
         print("INFO: STEP-2 Modeling Part Done")
 
 
-        print("======================DAQ-Refine finished==================")
+        print("====================================================================DAQ-Refine finished====================================================================")
         print("Selected strategy mode:", self.str_mode)
         print("Input query sequence:", self.query_sequence)
         print("Job ID:", self.jobname)
         print("Number of models to use:", self.num_relax)
         print("Template mode:", self.template_mode)
-        print("Output directory:", self.output_path)
+        print("Output directory:", self.result_dir)
 
 
 
