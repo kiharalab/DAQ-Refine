@@ -55,9 +55,17 @@ class Daqrefine:
         # envrionment variables
         from sys import version_info
         self.python_version = f"{version_info.major}.{version_info.minor}"
-        self.mmalign_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/MMalign"
-        self.maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
-        self.RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
+        self.emweb_path = "/bio/kihara-web/www/em/emweb-jobscheduler"
+        # self.emweb_daq_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine"
+        self.emweb_daqrefine_path = os.path.join(self.emweb_path,"algorithms/DAQ-Refine")
+        self.emweb_daq_path = os.path.join(self.emweb_path,"algorithms/DAQ")
+        # self.mmalign_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/MMalign"
+        self.mmalign_path = os.path.join(self.emweb_daqrefine_path,"MMalign")
+        # self.maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
+        
+        # self.RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
+        self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
+        self.maxit_path = os.path.join(self.RCSBROOT,"bin/maxit")
 
         # initialize these parameters in step-1
         self.daq_file = ''
@@ -106,6 +114,10 @@ class Daqrefine:
         self.pdb_filename = ''
         # self.pdb_file = ''
         self.model_name = ''
+
+        # parrameters in rerun DAQ
+        self.rerun_daq_result_path = ''
+        self.final_pdb_path = ''
 
         log_file = os.path.join(self.output_path, 'log.txt')
         logging.basicConfig(filename=log_file, level=logging.DEBUG)
@@ -695,15 +707,20 @@ class Daqrefine:
         </div>
         """))
     
-    def align_structure(self):
+    def rerun_daq(self):
+        
         set_working_directory(self.output_path)
         new_pdb = self.pdb_filename
         print(new_pdb)
 
         os.mkdir("DAQ")
         shutil.copy(self.pdb_filename, "DAQ/input.pdb")
+        self.rerun_daq_result_path = os.path.join(self.output_path,"DAQ")
+        input_map = os.path.join(self.output_path,"input.mrc")
+        input_pdb = os.path.join(self.rerun_daq_result_path,"DAQ/input.pdb")
 
         if self.str_mode in ["strategy 1", "strategy 2"]:
+            # align structure to input map
             try:
                 result = subprocess.run([self.mmalign_path, self.pdb_filename, self.pdb_input_path, "-o", "DAQ/input.pdb"], check=True, capture_output=True, text=True)
             except subprocess.CalledProcessError as e:
@@ -712,26 +729,89 @@ class Daqrefine:
                 print(f"Error: {e.stderr}")
             except Exception as e:
                 print(f"Unexpected error: {e}")
+
+            # rerun DAQ
+            try:
+                set_working_directory(self.emweb_daq_path)
+                result = subprocess.run(["conda", "deactivate"], capture_output=True, text=True)
+                if result.returncode != 0:
+                    print("Failed to deactivate Conda environment")
+                    print(result.stderr)
+                    exit(1)
+                result = subprocess.run(["module", "load", "cryoread"], capture_output=True, text=True)
+                if result.returncode != 0:
+                    print("Failed to load cryoread")
+                    print(result.stderr)
+                    exit(1)
+                subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"])
+            except subprocess.CalledProcessError as e:
+                print(f"Error executing DAQ. Return code: {e.returncode}")
+                print(f"Output: {e.output}")
+                print(f"Error: {e.stderr}")
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+
+        else:
+            # rerun DAQ
+            try:
+                set_working_directory(self.emweb_daq_path)
+                subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"])
+            except subprocess.CalledProcessError as e:
+                print(f"Error executing DAQ. Return code: {e.returncode}")
+                print(f"Output: {e.output}")
+                print(f"Error: {e.stderr}")
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+        
+        print("INFO: STEP-3 Computer refined DAQ Done")
+        
+
     
-    def visualize_structure_quality(self):
-        pass
-        # window_size = 9
-        # download_path = os.path.join(os.getcwd(), "Predict_Result")
-        # map_name = "input"
-        # output_pdb_path = os.path.join(download_path, map_name)
-        # output_pdb_path2 = os.path.join(output_pdb_path, "daq_score_w" + str(int(window_size)) + ".pdb")
-        # final_pdb_path = os.path.join(output_pdb_path, "daq_score_w" + str(int(window_size)) + "_reverse.pdb")
+    def reverse_pdb(filename, new_file_name):
+        with open(filename, "r") as rfile:
+            with open(new_file_name, 'w') as wfile:
+                for l in rfile:
+                    if l.startswith('ATOM'):
+                        sco = float(l[61:67])
+                        line = l[:60] + "%6.2f" % (sco) + "\n"
+                        wfile.write(line)
 
-        # def reverse_pdb(filename, new_file_name):
-        #     with open(filename, "r") as rfile:
-        #         with open(new_file_name, 'w') as wfile:
-        #             for l in rfile:
-        #                 if l.startswith('ATOM'):
-        #                     sco = float(l[61:67])
-        #                     line = l[:60] + "%6.2f" % (sco) + "\n"
-        #                     wfile.write(line)
+    def visualize_structure_quality_3d(self):
+        refined_result_path = os.path.joing(self.output_path,"DAQ")
+        self.final_pdb_path = os.path.join(refined_result_path, "daq_score_w9_reverse.pdb")
+        self.reverse_pdb(os.path.join(refined_result_path, "daq_score_w9.pdb"), self.final_pdb_path)
+    
+    def visualize_structure_quality_2d(self):
 
-        # reverse_pdb(output_pdb_path2, final_pdb_path)
+        def get_score(filename):
+            p = {}
+            with open(filename) as result:
+                for l in result:
+                    if l.startswith('ATOM') and l[12:16].replace(" ", "") == 'CA':
+                        l = l.strip("\n")
+                        split_result = l.split()
+                        resn = int(float(l[22:26]))
+                        p[resn] = float(split_result[-1])
+            return p
+
+        def read_chain_set(filename):
+            chain_set = set()
+            with open(filename) as result:
+                for l in result:
+                    if l.startswith('ATOM'):
+                        chain_name = l[21]
+                        chain_set.add(chain_name)
+            return chain_set
+
+        refined_result_path = os.path.joing(self.output_path,"DAQ")
+        output_pdb_path2 = os.path.join(refined_result_path, "daq_score_w9.pdb")
+        chain_list = read_chain_set(output_pdb_path2)
+        chain_list = list(chain_list)
+        chain_list.sort()
+        for chain_name in chain_list:
+            output_pdb_path3 = os.path.join(refined_result_path, "daq_score_w9_" + str(chain_name) + ".pdb")
+            final_pdb_path3 = os.path.join(refined_result_path, "daq_score_w9_" + str(chain_name) + "_reverse.pdb")
+            self.reverse_pdb(output_pdb_path3, final_pdb_path3)
 
 
 
@@ -805,7 +885,7 @@ class Daqrefine:
             print(f"Error in prediction(): {e}")
             exit(1)
 
-        
+        print("INFO: STEP-2 Modeling Part Done")
         try:
             self.display_structure(self.results)
             print("Store structure finished.")
@@ -813,22 +893,21 @@ class Daqrefine:
             print(f"Error in display_structure(results): {e}")
             exit(1)
         
+        print("INFO: STEP-3 Computer refined DAQ Started")
         try:
-            self.align_structure()
-            print("Align structure finished.")
+            self.rerun_daq()  
         except Exception as e:
-            print(f"Error in align_structure(): {e}")
+            print(f"Error in rerun_daq(): {e}")
             exit(1)
-        
+        print("INFO: STEP-3 Computer refined DAQ Done")
+        print("INFO: STEP-4 Visualize structure quality Started")
         try:
-            self.visualize_structure_quality()
+            self.visualize_structure_quality_3d()
             print("Visualize structure quality finished.")
         except Exception as e:
             print(f"Error in visualize_structure_quality(): {e}")
             exit(1)
-
-
-        print("INFO: STEP-2 Modeling Part Done")
+        print("INFO: STEP-4 Visualize structure quality Done")
 
 
         print("====================================================================DAQ-Refine finished====================================================================")
