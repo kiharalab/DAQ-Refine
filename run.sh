@@ -20,7 +20,10 @@ input_dir=$4
 output_dir=$5
 map=$6
 structure=$7
-query_sequence = $8
+query_sequence=$8
+
+echo $query_sequence
+
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
