@@ -593,8 +593,8 @@ class Daqrefine:
             input_features_callback=self.input_features_callback,
             save_recycles=self.save_recycles,
         )
-        results_zip = f"{self.jobname}.result.zip"
-        os.system(f"zip -r {results_zip} {self.result_dir}")
+        # results_zip = f"{self.jobname}.result.zip"
+        # os.system(f"zip -r {results_zip} {self.result_dir}")
         return results
     
     def save_image(self, filename):
@@ -879,7 +879,7 @@ class Daqrefine:
         try:
             
             check_gpu_with_torch()
-            self.prediction()
+            results = self.prediction()
             print("Prediction finished.")
         except Exception as e:
             print(f"Error in prediction(): {e}")
@@ -887,7 +887,7 @@ class Daqrefine:
 
         print("INFO: STEP-2 Modeling Part Done")
         try:
-            self.display_structure(self.results)
+            self.display_structure(results)
             print("Store structure finished.")
         except Exception as e:
             print(f"Error in display_structure(results): {e}")
