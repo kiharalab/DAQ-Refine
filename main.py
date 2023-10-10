@@ -55,6 +55,7 @@ class Daqrefine:
         # envrionment variables
         from sys import version_info
         self.python_version = f"{version_info.major}.{version_info.minor}"
+        self.mmalign_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/MMalign"
         self.maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
         self.RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
 
@@ -103,7 +104,7 @@ class Daqrefine:
         self.tag = ''
         self.jobname_prefix = ''
         self.pdb_filename = ''
-        self.pdb_file = ''
+        # self.pdb_file = ''
         self.model_name = ''
 
         log_file = os.path.join(self.output_path, 'log.txt')
@@ -602,6 +603,7 @@ class Daqrefine:
     def show_pdb(self,rank_num=1, show_sidechains=False, show_mainchains=False, color="lDDT"):
         self.model_name = f"rank_{rank_num}"
         view = py3Dmol.view(js='https://3dmol.org/build/3Dmol.js',)
+        # TODO change pdb_file such a stupid name
         view.addModel(open(self.pdb_file[0],'r').read(),'pdb')
 
         if color == "lDDT":
@@ -640,7 +642,7 @@ class Daqrefine:
         self.pdb_filename = f"{self.jobname}/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb"
         # os.rename(self.pdb_filename, f"input.pdb")
         
-        self.pdb_file = glob.glob(self.pdb_filename)
+        # self.pdb_file = glob.glob(self.pdb_filename)
 
         
 
@@ -694,8 +696,45 @@ class Daqrefine:
         """))
     
     def align_structure(self):
-        shutil.copy(self.pdb_filename, "input.pdb")
-        
+        set_working_directory(self.output_path)
+        new_pdb = self.pdb_filename
+        print(new_pdb)
+
+        os.mkdir("DAQ")
+        shutil.copy(self.pdb_filename, "DAQ/input.pdb")
+
+        if self.str_mode in ["strategy 1", "strategy 2"]:
+            try:
+                result = subprocess.run([self.mmalign_path, self.pdb_filename, self.pdb_input_path, "-o", "DAQ/input.pdb"], check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error executing {self.mmalign_path}. Return code: {e.returncode}")
+                print(f"Output: {e.output}")
+                print(f"Error: {e.stderr}")
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+    
+    def visualize_structure_quality(self):
+        pass
+        # window_size = 9
+        # download_path = os.path.join(os.getcwd(), "Predict_Result")
+        # map_name = "input"
+        # output_pdb_path = os.path.join(download_path, map_name)
+        # output_pdb_path2 = os.path.join(output_pdb_path, "daq_score_w" + str(int(window_size)) + ".pdb")
+        # final_pdb_path = os.path.join(output_pdb_path, "daq_score_w" + str(int(window_size)) + "_reverse.pdb")
+
+        # def reverse_pdb(filename, new_file_name):
+        #     with open(filename, "r") as rfile:
+        #         with open(new_file_name, 'w') as wfile:
+        #             for l in rfile:
+        #                 if l.startswith('ATOM'):
+        #                     sco = float(l[61:67])
+        #                     line = l[:60] + "%6.2f" % (sco) + "\n"
+        #                     wfile.write(line)
+
+        # reverse_pdb(output_pdb_path2, final_pdb_path)
+
+
+
 
     def run_modeling(self):
         # Extracted logic for running the modeling process
@@ -779,6 +818,13 @@ class Daqrefine:
             print("Align structure finished.")
         except Exception as e:
             print(f"Error in align_structure(): {e}")
+            exit(1)
+        
+        try:
+            self.visualize_structure_quality()
+            print("Visualize structure quality finished.")
+        except Exception as e:
+            print(f"Error in visualize_structure_quality(): {e}")
             exit(1)
 
 
