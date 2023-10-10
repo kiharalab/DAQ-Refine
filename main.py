@@ -903,6 +903,7 @@ class Daqrefine:
         print("INFO: STEP-4 Visualize structure quality Started")
         try:
             self.visualize_structure_quality_3d()
+            self.visualize_structure_quality_2d()
             print("Visualize structure quality finished.")
         except Exception as e:
             print(f"Error in visualize_structure_quality(): {e}")
