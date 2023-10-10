@@ -174,8 +174,9 @@ class Daqrefine:
         seq = seq.replace(" ","")
         protein_record = SeqRecord(Seq(seq), id=structure.id, description="")
 
+        return seq
         # Return the protein sequence in FASTA format
-        return protein_record.format("fasta")
+        # return protein_record.format("fasta")
 
 # import sys
 # fasta_string = pdb_to_fasta(sys.argv[1])
@@ -234,7 +235,7 @@ class Daqrefine:
         # Remove whitespaces
 
         # Try using the query sequence from the input
-        self.query_sequence = self.pdb_to_fasta(self.pdb_input_path)
+        # self.query_sequence = self.pdb_to_fasta(self.pdb_input_path)
         print("query_sequence: ",self.query_sequence)
         self.query_sequence = "".join(self.query_sequence.split())
 
