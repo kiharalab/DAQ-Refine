@@ -138,7 +138,7 @@ class Daqrefine:
 
 
 
-    def pdb_to_fasta(pdb_path):
+    def pdb_to_fasta(self,pdb_path):
         # Create a PDB parser object
         parser = PDBParser()
 
@@ -232,9 +232,10 @@ class Daqrefine:
         # Input target sequence
         # query_sequence = 'MGEVTAEEVEKFLDSNVSFAKQYYNLRYRAKVISDLLGPREAAVDFSNYHALNSVEESEIIFDLLRDFQDNLQAEKCVFNVMKKLCFLLQADRMSLFMYRARNGIAELATRLFNVHKDAVLEECLVAPDSEIVFPLDMGVVGHVALSKKIVNVPNTEEDEHFCDFVDTLTEYQTKNILASPIMNGKDVVAIIMVVNKVDGPHFTENDEEILLKYLNFANLIMKVFHLSYLHNCETRRGQILLWSGSKVFEELTDIERQFHKALYTVRAFLNCDRYSVGLLDMTKQKEFFDVWPVLMGEAPPYAGPRTPDGREINFYKVIDYILHGKEDIKVIPNPPPDHWALVSGLPTYVAQNGLICNIMNAPSEDFFAFQKEPLDESGWMIKNVLSMPIVNKKEEIVGVATFYNRKDGKPFDEMDETLMESLTQFLGWSVLNPDTYELMNKLENRKDIFQDMVKYHVKCDNEEIQTILKTREVYGKEPWECEEEELAEILQGELPDADKYEINKFHFSDLPLTELELVKCGIQMYYELKVVDKFHIPQEALVRFMYSLSKGYRRITYHNWRHGFNVGQTMFSLLVTGKLKRYFTDLEALAMVTAAFCHDIDHRGTNNLYQMKSQNPLAKLHGSSILERHHLEFGKTLLRDESLNIFQNLNRRQHEHAIHMMDIAIIATDLALYFKKRTMFQKIVDQSKTYETQQEWTQYMMLDQTRKEIVMAMMMTACDLSAITKPWEVQSKVALLVAAEFWEQGDLERTVLQQNPIPMMDRNKADELPKLQVGFIDFVCTFVYKEFSRFHEEITPMLDGITNNRKEWKALADEYETKMKGLEEEKQKQQAANQAAAGSQHGGKQPGGGPASKSCCVQ'
         # Remove whitespaces
-        
+
         # Try using the query sequence from the input
         self.query_sequence = self.pdb_to_fasta(self.pdb_input_path)
+        print("query_sequence: ",self.query_sequence)
         self.query_sequence = "".join(self.query_sequence.split())
 
         # Job name
@@ -824,7 +825,7 @@ class Daqrefine:
         
 
     
-    def reverse_pdb(filename, new_file_name):
+    def reverse_pdb(self,filename, new_file_name):
         with open(filename, "r") as rfile:
             with open(new_file_name, 'w') as wfile:
                 for l in rfile:
@@ -839,7 +840,7 @@ class Daqrefine:
         self.reverse_pdb(os.path.join(refined_result_path, "daq_score_w9.pdb"), self.final_pdb_path)
     
     
-    def get_score(filename):
+    def get_score(self,filename):
         p = {}
         with open(filename) as result:
             for l in result:
@@ -850,7 +851,7 @@ class Daqrefine:
                     p[resn] = float(split_result[-1])
         return p
 
-    def read_chain_set(filename):
+    def read_chain_set(self,filename):
         chain_set = set()
         with open(filename) as result:
             for l in result:
