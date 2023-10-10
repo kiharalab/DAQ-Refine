@@ -917,7 +917,8 @@ class Daqrefine:
         print("Job ID:", self.jobname)
         print("Number of models to use:", self.num_relax)
         print("Template mode:", self.template_mode)
-        print("Output directory:", self.result_dir)
+        print("Output directory:", self.rerun_daq_result_path)
+        print("Final structure:", self.final_pdb_path)
 
 
 
