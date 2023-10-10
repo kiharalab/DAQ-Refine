@@ -20,6 +20,7 @@ input_dir=$4
 output_dir=$5
 map=$6
 structure=$7
+query_sequence = $8
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
@@ -42,7 +43,7 @@ conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  
 
 which python3
 
-python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir"  || { echo "main.py failed"; exit 1; }
+python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir" --query_sequence="$query_sequence"  || { echo "main.py failed"; exit 1; }
 
 daqrefined_output_dir="${output_dir}/DAQ"
 
