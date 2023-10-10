@@ -32,6 +32,9 @@ import torch
 import shutil
 from PIL import Image
 import logging
+from Bio.PDB import PDBParser, PDBIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 
 
@@ -133,7 +136,50 @@ class Daqrefine:
         for attr, value in self.__dict__.items():
             logging.debug(f"{attr}: {value}")
 
-        
+
+
+    def pdb_to_fasta(pdb_path):
+        # Create a PDB parser object
+        parser = PDBParser()
+
+        # Parse the PDB file
+        structure = parser.get_structure("pdb_structure", pdb_path)
+
+        # Create a sequence object to store the protein sequence
+        seq = ""
+
+        # Loop over all the chains in the protein
+        for model in structure:
+            for chain in model:
+                # Create a string to store the amino acid sequence for this chain
+                chain_seq = ""
+
+                # Loop over all the residues in the chain
+                for residue in chain:
+                    # Check if the residue is an amino acid
+                    if residue.get_resname() not in ["HOH", "HOH2", "UNX", "UNL", "UNX1"]:
+                        # Get the one-letter amino acid code for the residue
+                        aa = residue.get_resname().upper()
+
+                        # Add the amino acid code to the chain sequence string
+                        chain_seq += aa
+
+                # Create a SeqRecord object for this chain sequence
+                record = SeqRecord(Seq(chain_seq), id=chain.get_id(), description="")
+
+                # Add the sequence to the overall protein sequence
+                seq += str(record.seq)
+
+        # Create a SeqRecord object for the protein sequence
+        seq = seq.replace(" ","")
+        protein_record = SeqRecord(Seq(seq), id=structure.id, description="")
+
+        # Return the protein sequence in FASTA format
+        return protein_record.format("fasta")
+
+# import sys
+# fasta_string = pdb_to_fasta(sys.argv[1])
+# print(fasta_string)  
     
     def TrimDAQ(self, filename, cutoff, outfile):
         daq = []
@@ -186,6 +232,9 @@ class Daqrefine:
         # Input target sequence
         # query_sequence = 'MGEVTAEEVEKFLDSNVSFAKQYYNLRYRAKVISDLLGPREAAVDFSNYHALNSVEESEIIFDLLRDFQDNLQAEKCVFNVMKKLCFLLQADRMSLFMYRARNGIAELATRLFNVHKDAVLEECLVAPDSEIVFPLDMGVVGHVALSKKIVNVPNTEEDEHFCDFVDTLTEYQTKNILASPIMNGKDVVAIIMVVNKVDGPHFTENDEEILLKYLNFANLIMKVFHLSYLHNCETRRGQILLWSGSKVFEELTDIERQFHKALYTVRAFLNCDRYSVGLLDMTKQKEFFDVWPVLMGEAPPYAGPRTPDGREINFYKVIDYILHGKEDIKVIPNPPPDHWALVSGLPTYVAQNGLICNIMNAPSEDFFAFQKEPLDESGWMIKNVLSMPIVNKKEEIVGVATFYNRKDGKPFDEMDETLMESLTQFLGWSVLNPDTYELMNKLENRKDIFQDMVKYHVKCDNEEIQTILKTREVYGKEPWECEEEELAEILQGELPDADKYEINKFHFSDLPLTELELVKCGIQMYYELKVVDKFHIPQEALVRFMYSLSKGYRRITYHNWRHGFNVGQTMFSLLVTGKLKRYFTDLEALAMVTAAFCHDIDHRGTNNLYQMKSQNPLAKLHGSSILERHHLEFGKTLLRDESLNIFQNLNRRQHEHAIHMMDIAIIATDLALYFKKRTMFQKIVDQSKTYETQQEWTQYMMLDQTRKEIVMAMMMTACDLSAITKPWEVQSKVALLVAAEFWEQGDLERTVLQQNPIPMMDRNKADELPKLQVGFIDFVCTFVYKEFSRFHEEITPMLDGITNNRKEWKALADEYETKMKGLEEEKQKQQAANQAAAGSQHGGKQPGGGPASKSCCVQ'
         # Remove whitespaces
+        
+        # Try using the query sequence from the input
+        self.query_sequence = self.pdb_to_fasta(self.pdb_input_path)
         self.query_sequence = "".join(self.query_sequence.split())
 
         # Job name
@@ -713,8 +762,16 @@ class Daqrefine:
         new_pdb = self.pdb_filename
         print(new_pdb)
 
-        os.mkdir("DAQ")
-        shutil.copy(self.pdb_filename, "DAQ/input.pdb")
+        if not os.path.exists("DAQ"):
+            os.mkdir("DAQ")
+
+        if os.path.exists(self.pdb_filename):
+            try:
+                shutil.copy(self.pdb_filename, "DAQ/input.pdb")
+            except Exception as e:
+                print(f"Error copying file: {e}")
+        else:
+            print(f"File '{self.pdb_filename}' not found.")
         self.rerun_daq_result_path = os.path.join(self.output_path,"DAQ")
         input_map = os.path.join(self.output_path,"input.mrc")
         input_pdb = os.path.join(self.rerun_daq_result_path,"DAQ/input.pdb")
@@ -777,43 +834,41 @@ class Daqrefine:
                         wfile.write(line)
 
     def visualize_structure_quality_3d(self):
-        refined_result_path = os.path.joing(self.output_path,"DAQ")
+        refined_result_path = os.path.join(self.output_path,"DAQ")
         self.final_pdb_path = os.path.join(refined_result_path, "daq_score_w9_reverse.pdb")
         self.reverse_pdb(os.path.join(refined_result_path, "daq_score_w9.pdb"), self.final_pdb_path)
     
+    
+    def get_score(filename):
+        p = {}
+        with open(filename) as result:
+            for l in result:
+                if l.startswith('ATOM') and l[12:16].replace(" ", "") == 'CA':
+                    l = l.strip("\n")
+                    split_result = l.split()
+                    resn = int(float(l[22:26]))
+                    p[resn] = float(split_result[-1])
+        return p
+
+    def read_chain_set(filename):
+        chain_set = set()
+        with open(filename) as result:
+            for l in result:
+                if l.startswith('ATOM'):
+                    chain_name = l[21]
+                    chain_set.add(chain_name)
+        return chain_set
+
     def visualize_structure_quality_2d(self):
-
-        def get_score(filename):
-            p = {}
-            with open(filename) as result:
-                for l in result:
-                    if l.startswith('ATOM') and l[12:16].replace(" ", "") == 'CA':
-                        l = l.strip("\n")
-                        split_result = l.split()
-                        resn = int(float(l[22:26]))
-                        p[resn] = float(split_result[-1])
-            return p
-
-        def read_chain_set(filename):
-            chain_set = set()
-            with open(filename) as result:
-                for l in result:
-                    if l.startswith('ATOM'):
-                        chain_name = l[21]
-                        chain_set.add(chain_name)
-            return chain_set
-
-        refined_result_path = os.path.joing(self.output_path,"DAQ")
+        refined_result_path = os.path.join(self.output_path,"DAQ")
         output_pdb_path2 = os.path.join(refined_result_path, "daq_score_w9.pdb")
-        chain_list = read_chain_set(output_pdb_path2)
+        chain_list = self.read_chain_set(output_pdb_path2)
         chain_list = list(chain_list)
         chain_list.sort()
         for chain_name in chain_list:
             output_pdb_path3 = os.path.join(refined_result_path, "daq_score_w9_" + str(chain_name) + ".pdb")
             final_pdb_path3 = os.path.join(refined_result_path, "daq_score_w9_" + str(chain_name) + "_reverse.pdb")
             self.reverse_pdb(output_pdb_path3, final_pdb_path3)
-
-
 
 
     def run_modeling(self):
@@ -961,7 +1016,8 @@ def get_arguments():
     parser.add_argument('--str_mode', type=str, default='strategy 2',
                         help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.',required=True)
     
-    parser.add_argument('--query_sequence', type=str, default='MGEVTAEEVEKFLDSNVSFAKQYYNLRYRAKVISDLLGPREAAVDFSNYHALNSVEESEIIFDLLRDFQDNLQAEKCVFNVMKKLCFLLQADRMSLFMYRARNGIAELATRLFNVHKDAVLEECLVAPDSEIVFPLDMGVVGHVALSKKIVNVPNTEEDEHFCDFVDTLTEYQTKNILASPIMNGKDVVAIIMVVNKVDGPHFTENDEEILLKYLNFANLIMKVFHLSYLHNCETRRGQILLWSGSKVFEELTDIERQFHKALYTVRAFLNCDRYSVGLLDMTKQKEFFDVWPVLMGEAPPYAGPRTPDGREINFYKVIDYILHGKEDIKVIPNPPPDHWALVSGLPTYVAQNGLICNIMNAPSEDFFAFQKEPLDESGWMIKNVLSMPIVNKKEEIVGVATFYNRKDGKPFDEMDETLMESLTQFLGWSVLNPDTYELMNKLENRKDIFQDMVKYHVKCDNEEIQTILKTREVYGKEPWECEEEELAEILQGELPDADKYEINKFHFSDLPLTELELVKCGIQMYYELKVVDKFHIPQEALVRFMYSLSKGYRRITYHNWRHGFNVGQTMFSLLVTGKLKRYFTDLEALAMVTAAFCHDIDHRGTNNLYQMKSQNPLAKLHGSSILERHHLEFGKTLLRDESLNIFQNLNRRQHEHAIHMMDIAIIATDLALYFKKRTMFQKIVDQSKTYETQQEWTQYMMLDQTRKEIVMAMMMTACDLSAITKPWEVQSKVALLVAAEFWEQGDLERTVLQQNPIPMMDRNKADELPKLQVGFIDFVCTFVYKEFSRFHEEITPMLDGITNNRKEWKALADEYETKMKGLEEEKQKQQAANQAAAGSQHGGKQPGGGPASKSCCVQ',
+    # MGEVTAEEVEKFLDSNVSFAKQYYNLRYRAKVISDLLGPREAAVDFSNYHALNSVEESEIIFDLLRDFQDNLQAEKCVFNVMKKLCFLLQADRMSLFMYRARNGIAELATRLFNVHKDAVLEECLVAPDSEIVFPLDMGVVGHVALSKKIVNVPNTEEDEHFCDFVDTLTEYQTKNILASPIMNGKDVVAIIMVVNKVDGPHFTENDEEILLKYLNFANLIMKVFHLSYLHNCETRRGQILLWSGSKVFEELTDIERQFHKALYTVRAFLNCDRYSVGLLDMTKQKEFFDVWPVLMGEAPPYAGPRTPDGREINFYKVIDYILHGKEDIKVIPNPPPDHWALVSGLPTYVAQNGLICNIMNAPSEDFFAFQKEPLDESGWMIKNVLSMPIVNKKEEIVGVATFYNRKDGKPFDEMDETLMESLTQFLGWSVLNPDTYELMNKLENRKDIFQDMVKYHVKCDNEEIQTILKTREVYGKEPWECEEEELAEILQGELPDADKYEINKFHFSDLPLTELELVKCGIQMYYELKVVDKFHIPQEALVRFMYSLSKGYRRITYHNWRHGFNVGQTMFSLLVTGKLKRYFTDLEALAMVTAAFCHDIDHRGTNNLYQMKSQNPLAKLHGSSILERHHLEFGKTLLRDESLNIFQNLNRRQHEHAIHMMDIAIIATDLALYFKKRTMFQKIVDQSKTYETQQEWTQYMMLDQTRKEIVMAMMMTACDLSAITKPWEVQSKVALLVAAEFWEQGDLERTVLQQNPIPMMDRNKADELPKLQVGFIDFVCTFVYKEFSRFHEEITPMLDGITNNRKEWKALADEYETKMKGLEEEKQKQQAANQAAAGSQHGGKQPGGGPASKSCCVQ
+    parser.add_argument('--query_sequence', type=str, default='',
                         help='Input target protein sequence.')
 
     parser.add_argument('--jobname', type=str, default='',

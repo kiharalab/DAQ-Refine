@@ -7,10 +7,10 @@ output_folder = sys.argv[1]
 
 data = {
     "pdbfiles":
-  "daq_score_w9.pdb"
+  "daq_score_w9_reverse.pdb"
 }
 parent_folder = os.path.dirname(output_folder)
-check_file=output_folder+"/daq_score_w9.pdb"
+check_file=output_folder+"/daq_score_w9_reverse.pdb"
 if os.path.exists(check_file):
     with open("%s/done.out"%parent_folder,'w') as wfile:
         wfile.write("DONE\n")
