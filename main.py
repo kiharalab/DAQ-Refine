@@ -919,6 +919,7 @@ class Daqrefine:
         print("Template mode:", self.template_mode)
         print("Output directory:", self.rerun_daq_result_path)
         print("Final structure:", self.final_pdb_path)
+        print("====================================================================DAQ-Refine finished====================================================================")
 
 
 
