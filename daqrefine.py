@@ -936,12 +936,12 @@ class Daqrefine:
         
 
 
-        print("====================================================================DAQ-Refine finished====================================================================")
-        print("Selected strategy mode:", self.str_mode)
-        print("Input query sequence:", self.query_sequence)
-        print("Job ID:", self.jobname)
-        print("Number of models to use:", self.num_relax)
-        print("Template mode:", self.template_mode)
-        print("Output directory:", self.rerun_daq_result_path)
-        print("Final structure:", self.final_pdb_path)
-        print("====================================================================DAQ-Refine finished====================================================================")
+        # print("====================================================================DAQ-Refine finished====================================================================")
+        # print("Selected strategy mode:", self.str_mode)
+        # print("Input query sequence:", self.query_sequence)
+        # print("Job ID:", self.jobname)
+        # print("Number of models to use:", self.num_relax)
+        # print("Template mode:", self.template_mode)
+        # print("Output directory:", self.rerun_daq_result_path)
+        # print("Final structure:", self.final_pdb_path)
+        # print("====================================================================DAQ-Refine finished====================================================================")
