@@ -58,7 +58,7 @@ daqrefined_structure="${output_dir}/DAQ/input.pdb"
 conda deactivate || { echo "Failed to deactivate Conda environment"; exit 1; }
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
 
-$CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output=$daqrefined_output_dir --window 9 --stride 2 --batch_size=512  || { echo "main.py failed"; exit 1; }
+$CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$daqrefined_structure --output=$daqrefined_output_dir --window 9 --stride 2 --batch_size=512  || { echo "main.py failed"; exit 1; }
 
 echo "INFO: STEP-3 Computer refined DAQ Done"
 echo "INFO: STEP-4 Visualize structure quality Started"

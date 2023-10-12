@@ -730,6 +730,8 @@ class Daqrefine:
         self.tag = results["rank"][0][self.rank_num - 1]
         self.jobname_prefix = ".custom" if self.msa_mode == "custom" else ""
         self.pdb_filename = os.path.join(self.output_path,f"results/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb")
+
+        self.rerun_daq()
         # os.rename(self.pdb_filename, f"input.pdb")
         
         # self.pdb_file = glob.glob(self.pdb_filename)
