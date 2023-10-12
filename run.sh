@@ -50,6 +50,7 @@ python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$p
 
 daqrefined_output_dir="${output_dir}/DAQ"
 
+
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine" || { echo "Failed to change directory"; exit 1; }
 echo "INFO: leave DAQ dir, enter DAQ_refine"
 python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }

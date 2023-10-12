@@ -792,17 +792,17 @@ class Daqrefine:
             # rerun DAQ
             try:
                 set_working_directory(self.emweb_daq_path)
-                result = subprocess.run(["conda", "deactivate"], capture_output=True, text=True)
-                if result.returncode != 0:
-                    print("Failed to deactivate Conda environment")
-                    print(result.stderr)
-                    exit(1)
-                result = subprocess.run(["module", "load", "cryoread"], capture_output=True, text=True)
-                if result.returncode != 0:
-                    print("Failed to load cryoread")
-                    print(result.stderr)
-                    exit(1)
-                subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"])
+                # result = subprocess.run(["conda", "deactivate"], capture_output=True, text=True, shell=True)
+                # if result.returncode != 0:
+                #     print("Failed to deactivate Conda environment")
+                #     print(result.stderr)
+                #     exit(1)
+                # result = subprocess.run(["module", "load", "cryoread"], capture_output=True, text=True, shell=True)
+                # if result.returncode != 0:
+                #     print("Failed to load cryoread")
+                #     print(result.stderr)
+                #     exit(1)
+                subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"], shell=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error executing DAQ. Return code: {e.returncode}")
                 print(f"Output: {e.output}")
