@@ -74,7 +74,8 @@ echo "INFO: STEP-5 write job yml Started"
 python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
 echo "INFO: STEP-5 write job yml Done"
 
-echo "====================================================================DAQ-Refine Finished===================================================================="
-echo "Results stored in ${daqrefined_output_dir}"
-echo "====================================================================DAQ-Refine Finished===================================================================="
+echo "==================================================DAQ-Refine Finished=================================================="
+echo "Results stored in: "
+echo: $daqrefined_output_dir
+echo "==================================================DAQ-Refine Finished=================================================="
 
