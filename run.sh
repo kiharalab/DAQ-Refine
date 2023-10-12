@@ -48,12 +48,30 @@ which python3
 
 python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir" --query_sequence="$query_sequence"  || { echo "main.py failed"; exit 1; }
 
+# rerun DAQ
+echo "INFO: STEP-3 Computer refined DAQ Started"
+
+cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ" || { echo "Failed to change directory"; exit 1; }
+
 daqrefined_output_dir="${output_dir}/DAQ"
+daqrefined_structure="${output_dir}/DAQ/input.pdb"
+conda deactivate || { echo "Failed to deactivate Conda environment"; exit 1; }
+module load cryoread || { echo "Failed to load cryoread"; exit 1; }
 
+$CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output=$daqrefined_output_dir --window 9 --stride 2 --batch_size=512  || { echo "main.py failed"; exit 1; }
 
+echo "INFO: STEP-3 Computer refined DAQ Done"
+echo "INFO: STEP-4 Visualize structure quality Started"
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine" || { echo "Failed to change directory"; exit 1; }
 echo "INFO: leave DAQ dir, enter DAQ_refine"
-python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
+python3 reverse.py $output_dir  || { echo "reverse.py failed"; exit 1; }
+echo "INFO: STEP-4 Visualize structure quality Done"
+
+
+echo "INFO: STEP-5 write job yml Started"
+
+python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
+echo "INFO: STEP-5 write job yml Done"
 
 
