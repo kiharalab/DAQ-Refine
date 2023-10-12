@@ -775,12 +775,13 @@ class Daqrefine:
         else:
             print(f"File '{self.pdb_filename}' not found.")
         self.rerun_daq_result_path = os.path.join(self.output_path,"DAQ")
-        input_map = os.path.join(self.output_path,"input.mrc")
+        input_map = os.path.join(self.output_path,"input_resize.mrc")
         input_pdb = os.path.join(self.rerun_daq_result_path,"DAQ/input.pdb")
 
         if self.str_mode in ["strategy 1", "strategy 2"]:
             # align structure to input map
             try:
+                print('align structure to input map')
                 result = subprocess.run([self.mmalign_path, self.pdb_filename, self.pdb_input_path, "-o", "DAQ/input.pdb"], check=True, capture_output=True, text=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error executing {self.mmalign_path}. Return code: {e.returncode}")
@@ -802,7 +803,8 @@ class Daqrefine:
                 #     print("Failed to load cryoread")
                 #     print(result.stderr)
                 #     exit(1)
-                subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"], shell=True)
+                print('rerun DAQ')
+                result = subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"], shell=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error executing DAQ. Return code: {e.returncode}")
                 print(f"Output: {e.output}")
