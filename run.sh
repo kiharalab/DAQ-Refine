@@ -44,7 +44,7 @@ conda deactivate  || { echo "Failed to deactivate Conda environment"; exit 1; }
 module load cuda/11.8
 conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  || { echo "Failed to activate daq_refine environment"; exit 1; }
 
-which python3
+# which python3
 
 python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir" --query_sequence="$query_sequence"  || { echo "main.py failed"; exit 1; }
 
@@ -73,6 +73,8 @@ echo "INFO: STEP-5 write job yml Started"
 
 python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
 echo "INFO: STEP-5 write job yml Done"
+
+echo $output_dir
 
 echo "==================================================DAQ-Refine Finished=================================================="
 echo "Results stored in: "
