@@ -150,7 +150,7 @@ class Daqrefine:
         self.final_pdb_path = ''
 
         log_file = os.path.join(self.output_path, 'log.txt')
-        logging.basicConfig(filename=log_file, level=logging.DEBUG)
+        # logging.basicConfig(filename=log_file, level=DEBUG)
 
 
 
@@ -159,9 +159,9 @@ class Daqrefine:
     def print_parameters(self):
         # Extracted logic for printing help
         """Prints all the parameters of the instance."""
-        logging.debug("=================================Parameters of the DaqRefine instance:=================================")
+        print("=================================Parameters of the DaqRefine instance:=================================")
         for attr, value in self.__dict__.items():
-            logging.debug(f"{attr}: {value}")
+            print(f"{attr}: {value}")
 
 
 
@@ -242,14 +242,14 @@ class Daqrefine:
             try:
                 self.TrimDAQ(self.pdb_input_path, 0.0, self.input_path+'/1tmp.pdb')
             except Exception as e:
-                logging.debug(f"Error while trimming DAQ: {e}")
+                print(f"Error while trimming DAQ: {e}")
                 return False
 
             try:
                 subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.input_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
                 self.daq_file = self.output_path+'/1tmp.cif'
             except subprocess.CalledProcessError as e:
-                logging.debug(f"Maxit subprocess failed: {e}")
+                print(f"Maxit subprocess failed: {e}")
                 return False
 
             return True
@@ -296,7 +296,7 @@ class Daqrefine:
             try:
                 os.rename(self.daq_file, f"template/1tmp.cif")
             except FileNotFoundError:
-                logging.debug("Could not find daq_file to rename.")
+                print("Could not find daq_file to rename.")
                 return False
 
             #     return True
@@ -416,7 +416,7 @@ class Daqrefine:
         if self.str_mode == "strategy 2":
 
             if not os.path.isfile(self.pdb_input_path):
-                logging.debug('Cannot find DAQ-score output file!!')
+                print('Cannot find DAQ-score output file!!')
                 exit(1)  # Or handle this case differently
             
             # print(f'User uploaded MSA file at {cust_msa_file}')
@@ -425,7 +425,7 @@ class Daqrefine:
                 a3m = self.ReadA3M(self.cust_msa_path)
                 daq, good = self.ReadDAQ(self.pdb_input_path, 0.0, 0.0)
             except FileNotFoundError:
-                logging.debug("MSA file or DAQ-score output file not found.")
+                print("MSA file or DAQ-score output file not found.")
                 return False
             
             new_a3m = self.trim_a3m(a3m, daq, good)
@@ -460,7 +460,7 @@ class Daqrefine:
 
                 os.rename(self.custom_msa, self.a3m_file)
                 self.queries_path=self.a3m_file
-                logging.info(f"moving {self.custom_msa} to {self.a3m_file}")
+                print(f"moving {self.custom_msa} to {self.a3m_file}")
         elif self.msa_mode.startswith("mmseqs2"):
             self.a3m_file = f"{self.jobname}.a3m"
         elif self.msa_mode == "custom":
@@ -479,7 +479,7 @@ class Daqrefine:
                     # print(line, end='')
                 os.rename(self.custom_msa, self.a3m_file)
                 self.queries_path = self.a3m_file
-                logging.info(f"moving {self.custom_msa} to {self.a3m_file}")
+                print(f"moving {self.custom_msa} to {self.a3m_file}")
         else:
             self.a3m_file = f"{self.jobname}.single_sequence.a3m"
             with open(self.a3m_file, "w") as text_file:
@@ -636,9 +636,9 @@ class Daqrefine:
         else:
             self.use_cluster_profile = True
 
-        logging.debug('=====================================DEBUG: PRINT PARAMETERS=====================================')
+        print('=====================================DEBUG: PRINT PARAMETERS=====================================')
         self.print_parameters()
-        logging.debug('=====================================DEBUG: PRINT PARAMETERS=====================================')
+        print('=====================================DEBUG: PRINT PARAMETERS=====================================')
 
         download_alphafold_params(self.model_type, Path("."))
         results = run(
@@ -879,7 +879,7 @@ class Daqrefine:
             exit(1)
 
         print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
-        # logging.info("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
+        # print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
 
         try:
             self.prepare_trimmed_template()
