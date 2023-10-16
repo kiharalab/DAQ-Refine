@@ -134,6 +134,7 @@ class Daqrefine:
         self.result_dir = ''
 
         # parameters used in display
+        self.dispaly_images = False
         self.rank_num = 1 #@param ["1", "2", "3", "4", "5"] {type:"raw"}
         self.color = '' #@param ["chain", "lDDT", "rainbow"]
         self.show_sidechains = False #@param {type:"boolean"}
@@ -649,9 +650,9 @@ class Daqrefine:
         else:
             self.use_cluster_profile = True
 
-        print('=====================================DEBUG: PRINT PARAMETERS=====================================')
-        self.print_parameters()
-        print('=====================================DEBUG: PRINT PARAMETERS=====================================')
+        # print('=====================================DEBUG: PRINT PARAMETERS=====================================')
+        # self.print_parameters()
+        # print('=====================================DEBUG: PRINT PARAMETERS=====================================')
 
         download_alphafold_params(self.model_type, Path("."))
         results = run(
