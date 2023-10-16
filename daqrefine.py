@@ -421,6 +421,7 @@ class Daqrefine:
             
             # print(f'User uploaded MSA file at {cust_msa_file}')
             
+            print(self.cust_msa_path)
             try:
                 a3m = self.ReadA3M(self.cust_msa_path)
                 daq, good = self.ReadDAQ(self.pdb_input_path, 0.0, 0.0)
