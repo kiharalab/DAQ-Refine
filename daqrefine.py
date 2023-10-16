@@ -263,7 +263,7 @@ class Daqrefine:
 
         # Try using the query sequence from the input
         # self.query_sequence = self.pdb_to_fasta(self.pdb_input_path)
-        print("query_sequence: ",self.query_sequence)
+        # print("query_sequence: ",self.query_sequence)
         self.query_sequence = "".join(self.query_sequence.split())
 
         # Job name
@@ -421,7 +421,7 @@ class Daqrefine:
             
             # print(f'User uploaded MSA file at {cust_msa_file}')
             
-            print(self.cust_msa_path)
+            # print(self.cust_msa_path)
             try:
                 a3m = self.ReadA3M(self.cust_msa_path)
                 daq, good = self.ReadDAQ(self.pdb_input_path, 0.0, 0.0)
@@ -434,6 +434,10 @@ class Daqrefine:
             filename = os.path.join(self.output_path, 'trimmed_msa.a3m')
             self.save_a3m(filename, new_a3m)
             self.daq_msa = filename
+            file_path = filename
+            file_size = os.path.getsize(file_path)
+
+            print(f"The size of '{file_path}' is {file_size} bytes.")
             return self.daq_msa
         return
     
@@ -462,6 +466,10 @@ class Daqrefine:
                 os.rename(self.custom_msa, self.a3m_file)
                 self.queries_path=self.a3m_file
                 print(f"moving {self.custom_msa} to {self.a3m_file}")
+                file_path = self.a3m_file
+                file_size = os.path.getsize(file_path)
+
+                print(f"The size of '{file_path}' is {file_size} bytes.")
         elif self.msa_mode.startswith("mmseqs2"):
             self.a3m_file = f"{self.jobname}.a3m"
         elif self.msa_mode == "custom":
@@ -792,7 +800,7 @@ class Daqrefine:
         
         set_working_directory(self.output_path)
         new_pdb = self.pdb_filename
-        print(new_pdb)
+        # print(new_pdb)
 
         if not os.path.exists("DAQ"):
             os.mkdir("DAQ")
