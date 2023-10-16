@@ -434,7 +434,7 @@ class Daqrefine:
             filename = os.path.join(self.output_path, 'trimmed_msa.a3m')
             self.save_a3m(filename, new_a3m)
             self.daq_msa = filename
-            file_path = filename
+            file_path = self.daq_msa
             file_size = os.path.getsize(file_path)
 
             print(f"The size of '{file_path}' is {file_size} bytes.")
@@ -446,6 +446,10 @@ class Daqrefine:
         self.msa_mode = "mmseqs2_uniref_env"
         self.pair_mode = "unpaired_paired"
         set_working_directory(self.output_path)
+        file_path = self.daq_msa
+        file_size = os.path.getsize(file_path)
+
+        print(f"The size of '{file_path}' is {file_size} bytes.")
 
         if self.str_mode == "strategy 2":
             self.msa_mode = "custom"
