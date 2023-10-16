@@ -425,8 +425,8 @@ class Daqrefine:
                 a3m = self.ReadA3M(self.cust_msa_path)
                 daq, good = self.ReadDAQ(self.pdb_input_path, 0.0, 0.0)
             except FileNotFoundError:
-                print("MSA file or DAQ-score output file not found.")
-                return False
+                print("MSA file not found.")
+                exit(1)
             
             new_a3m = self.trim_a3m(a3m, daq, good)
             
