@@ -88,16 +88,17 @@ def main():
     args = get_arguments()
 
     # run vanilla alphafold to get msa file
-    print("INFO: strategy 2 selected, running vanilla alphafold to get the msa file")
+    
     if args.str_mode == 'strategy 2':
-        args.VA == 'Y'
+        print("INFO: strategy 2 selected, running vanilla alphafold to get the msa file")
+        args.VA = 'Y'
         vanilla_af2_result = Daqrefine(
             args=args
         )
         vanilla_af2_result.run_modeling()
     
     # Create an instance of the ProteinModeling class
-    args.VA == 'N'
+    args.VA = 'N'
     a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
     args.cust_msa_path = a3m_files[0]
     modeling = Daqrefine(
