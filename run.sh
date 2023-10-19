@@ -24,7 +24,7 @@ structure=$7
 query_sequence=$8
 # msa_file=$9
 
-echo $query_sequence
+# echo $query_sequence
 
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
@@ -73,7 +73,7 @@ echo "INFO: STEP-4 Visualize structure quality Done"
 
 echo "INFO: STEP-5 write job yml Started"
 
-which python3
+# which python3
 $CRYOREAD_PYTHON writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
 echo "INFO: STEP-5 write job yml Done"
 

@@ -97,11 +97,13 @@ def main():
             args=args
         )
         vanilla_af2_result.run_modeling()
+        a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
+        args.cust_msa_path = a3m_files[0]
     
     # Create an instance of the ProteinModeling class
     args.VA = 'N'
-    a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
-    args.cust_msa_path = a3m_files[0]
+
+
     modeling = Daqrefine(
         args=args
     )
