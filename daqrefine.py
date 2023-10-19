@@ -257,7 +257,7 @@ class Daqrefine:
                 return False
 
             return True
-        return False
+        return True
     
     def prepare_trimmed_template(self):
         # Extracted logic for preparing trimmed template
@@ -897,7 +897,7 @@ class Daqrefine:
         except Exception as e:
             print(f"Error in get_input(): {e}")
             exit(1)
-            
+
         if self.str_mode != "Vanilla AF2":
             print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
         # print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
