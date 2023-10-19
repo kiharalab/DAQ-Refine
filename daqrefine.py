@@ -82,6 +82,9 @@ class Daqrefine:
         self.str_mode = args.str_mode
         self.pdb_input_path = args.pdb_input_path
 
+        if args.VA == 'Y':
+            self.str_mode = 'Vanilla AF2'
+
         # envrionment variables
         from sys import version_info
         self.python_version = f"{version_info.major}.{version_info.minor}"
@@ -635,7 +638,10 @@ class Daqrefine:
 
 
 
-        self.result_dir = f"{self.output_path}/results"
+        if self.str_mode == "Vanilla AF2":
+            self.result_dir = f"{self.output_path}/Vanilla_AF2_results"
+        else:
+            self.result_dir = f"{self.output_path}/results"
         os.makedirs(self.result_dir, exist_ok=True)
         self.log_filename = os.path.join(self.result_dir,"colabfold_log.txt")
         if not os.path.isfile(self.log_filename) or 'logging_setup' not in globals():
@@ -891,8 +897,9 @@ class Daqrefine:
         except Exception as e:
             print(f"Error in get_input(): {e}")
             exit(1)
-
-        print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
+            
+        if self.str_mode != "Vanilla AF2":
+            print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
         # print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
 
         try:
@@ -909,8 +916,9 @@ class Daqrefine:
             print(f"Error in msa(): {e}")
             exit(1)
 
-        print("INFO: STEP-1 Input Protein Sequence and DAQ result file Done")
-        print("INFO: STEP-2 Modeling Part started")
+        if self.str_mode != "Vanilla AF2":
+            print("INFO: STEP-1 Input Protein Sequence and DAQ result file Done")
+            print("INFO: STEP-2 Modeling Part started")
 
         try:
             self.msa_settings()
@@ -942,10 +950,12 @@ class Daqrefine:
             print(f"Error in prediction(): {e}")
             exit(1)
 
-        print("INFO: STEP-2 Modeling Part Done")
+        if self.str_mode != "Vanilla AF2":
+            print("INFO: STEP-2 Modeling Part Done")
         try:
-            self.display_structure(results)
-            print("Store structure finished.")
+            if self.str_mode != "Vanilla AF2":
+                self.display_structure(results)
+                print("Store structure finished.")
         except Exception as e:
             print(f"Error in display_structure(results): {e}")
             exit(1)

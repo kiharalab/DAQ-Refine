@@ -39,7 +39,10 @@ from daqrefine import Daqrefine
 
 
 
-
+def search_files(directory, extension):
+    return [os.path.join(root, file)
+            for root, dirs, files in os.walk(directory)
+            for file in files if file.endswith(extension)]
 
 def get_arguments():
     parser = argparse.ArgumentParser(description='STEP-1: Input Protein Sequence and DAQ result file')
@@ -48,7 +51,7 @@ def get_arguments():
     parser.add_argument('--str_mode', type=str, default='strategy 2',
                         help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.',required=True)
     
-    # MGEVTAEEVEKFLDSNVSFAKQYYNLRYRAKVISDLLGPREAAVDFSNYHALNSVEESEIIFDLLRDFQDNLQAEKCVFNVMKKLCFLLQADRMSLFMYRARNGIAELATRLFNVHKDAVLEECLVAPDSEIVFPLDMGVVGHVALSKKIVNVPNTEEDEHFCDFVDTLTEYQTKNILASPIMNGKDVVAIIMVVNKVDGPHFTENDEEILLKYLNFANLIMKVFHLSYLHNCETRRGQILLWSGSKVFEELTDIERQFHKALYTVRAFLNCDRYSVGLLDMTKQKEFFDVWPVLMGEAPPYAGPRTPDGREINFYKVIDYILHGKEDIKVIPNPPPDHWALVSGLPTYVAQNGLICNIMNAPSEDFFAFQKEPLDESGWMIKNVLSMPIVNKKEEIVGVATFYNRKDGKPFDEMDETLMESLTQFLGWSVLNPDTYELMNKLENRKDIFQDMVKYHVKCDNEEIQTILKTREVYGKEPWECEEEELAEILQGELPDADKYEINKFHFSDLPLTELELVKCGIQMYYELKVVDKFHIPQEALVRFMYSLSKGYRRITYHNWRHGFNVGQTMFSLLVTGKLKRYFTDLEALAMVTAAFCHDIDHRGTNNLYQMKSQNPLAKLHGSSILERHHLEFGKTLLRDESLNIFQNLNRRQHEHAIHMMDIAIIATDLALYFKKRTMFQKIVDQSKTYETQQEWTQYMMLDQTRKEIVMAMMMTACDLSAITKPWEVQSKVALLVAAEFWEQGDLERTVLQQNPIPMMDRNKADELPKLQVGFIDFVCTFVYKEFSRFHEEITPMLDGITNNRKEWKALADEYETKMKGLEEEKQKQQAANQAAAGSQHGGKQPGGGPASKSCCVQ
+    # MENSMMFISRSLRRPVTALNCNLQSVRTVIYLHKGPRINGLRRDPESYLRNPSGVLFTEVNAKECQDKVRSILQLPKYGINLSNELILQCLTHKSFAHGSKPYNEKLNLLGAQFLKLQTCIHSLKNGSPAESCENGQLSLQFSNLGTKFAKELTSKNTACTFVKLHNLGPFIFWKMRDPIKDGHINGETTIFASVLNAFIGAILSTNGSEKAAKFIQGSLLDKEDLHSLVNIANENVASAKAKISDKENKAFL
     parser.add_argument('--query_sequence', type=str, default='',
                         help='Input target protein sequence.',required=True)
 
@@ -72,6 +75,9 @@ def get_arguments():
 
     parser.add_argument('--output_path', type=str, default='',
                         help='Path to the directory of the output files.',required=True)
+    
+    parser.add_argument('--VA', type=str, default='',
+                    help='Whether to run VA to get the msa file')
 
     args = parser.parse_args()
 
@@ -80,8 +86,20 @@ def get_arguments():
 def main():
     # Get arguments (this function needs to be implemented based on the original code)
     args = get_arguments()
+
+    # run vanilla alphafold to get msa file
+    print("INFO: strategy 2 selected, running vanilla alphafold to get the msa file")
+    if args.str_mode == 'strategy 2':
+        args.VA == 'Y'
+        vanilla_af2_result = Daqrefine(
+            args=args
+        )
+        vanilla_af2_result.run_modeling()
     
     # Create an instance of the ProteinModeling class
+    args.VA == 'N'
+    a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
+    args.cust_msa_path = a3m_files[0]
     modeling = Daqrefine(
         args=args
     )

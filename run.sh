@@ -21,7 +21,7 @@ output_dir=$5
 map=$6
 structure=$7
 query_sequence=$8
-msa_file=$9
+# msa_file=$9
 
 echo $query_sequence
 
@@ -47,7 +47,7 @@ conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  
 
 # which python3
 
-python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir" --query_sequence="$query_sequence" --cust_msa_path="$msa_file"  || { echo "main.py failed"; exit 1; }
+python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir" --query_sequence="$query_sequence" || { echo "main.py failed"; exit 1; }
 
 # rerun DAQ
 echo "INFO: STEP-3 Computer refined DAQ Started"
