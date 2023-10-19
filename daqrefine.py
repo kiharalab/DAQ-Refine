@@ -161,15 +161,15 @@ class Daqrefine:
 
 
 
-    def clean_up(self):
-        set_working_directory(self.output_path)
+    def clean_up(self,args):
+        set_working_directory(args.output_path)
         
-        self._cleanup_folders(["results", "Vanilla_AF2_results", "DAQ", "template"])
-        self._cleanup_files_with_suffixes([".a3m", ".csv", ".log", ".txt"])
+        self._cleanup_folders(["results", "Vanilla_AF2_results", "DAQ", "template"],args)
+        self._cleanup_files_with_suffixes([".a3m", ".csv", ".log", ".txt"],args)
 
-    def _cleanup_folders(self, folders):
+    def _cleanup_folders(self, folders,args):
         for folder in folders:
-            folder_path = os.path.join(self.output_path, folder)
+            folder_path = os.path.join(args.output_path, folder)
             if os.path.exists(folder_path) and os.path.isdir(folder_path):
                 try:
                     shutil.rmtree(folder_path)
@@ -179,10 +179,10 @@ class Daqrefine:
             else:
                 print(f"'{folder}' folder does not exist in the current directory.")
 
-    def _cleanup_files_with_suffixes(self, suffixes):
-        for filename in os.listdir(self.output_path):
+    def _cleanup_files_with_suffixes(self, suffixes,args):
+        for filename in os.listdir(args.output_path):
             if any(filename.endswith(end) for end in suffixes):
-                file_path = os.path.join(self.output_path, filename)
+                file_path = os.path.join(args.output_path, filename)
                 try:
                     os.remove(file_path)
                     print(f"Deleted: {file_path}")

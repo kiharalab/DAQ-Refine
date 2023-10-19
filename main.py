@@ -97,7 +97,7 @@ def main():
             args=args
         )
         # clean up the directory
-        vanilla_af2_result.clean_up()
+        vanilla_af2_result.clean_up(args)
         # run modeling
         vanilla_af2_result.run_modeling()
         a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
@@ -113,7 +113,7 @@ def main():
     
     # Run the modeling process
     if args.str_mode == 'strategy 1':
-        modeling.clean_up()
+        modeling.clean_up(args)
     modeling.run_modeling()
 
 if __name__ == '__main__':
