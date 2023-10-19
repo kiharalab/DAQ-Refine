@@ -81,6 +81,6 @@ echo $output_dir
 
 echo "==================================================DAQ-Refine Finished=================================================="
 echo "Results stored in: "
-echo $daqrefined_output_dir
+echo "$daqrefined_output_dir"
 echo "==================================================DAQ-Refine Finished=================================================="
 
