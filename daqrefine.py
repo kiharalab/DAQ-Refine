@@ -69,8 +69,7 @@ def set_working_directory(path):
 
 class Daqrefine:
     def __init__(self,args):
-        # clean up the directory
-        self.clean_up()
+
 
         # Initialize class variables
 
