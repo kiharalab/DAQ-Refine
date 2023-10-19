@@ -96,6 +96,9 @@ def main():
         vanilla_af2_result = Daqrefine(
             args=args
         )
+        # clean up the directory
+        vanilla_af2_result.clean_up()
+        # run modeling
         vanilla_af2_result.run_modeling()
         a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
         args.cust_msa_path = a3m_files[0]
@@ -109,6 +112,8 @@ def main():
     )
     
     # Run the modeling process
+    if args.str_mode == 'strategy 1':
+        modeling.clean_up()
     modeling.run_modeling()
 
 if __name__ == '__main__':
