@@ -89,6 +89,7 @@ def main():
 
     # run vanilla alphafold to get msa file
     
+    vanilla_af2_result = None
     if args.str_mode == 'strategy 2':
         print("INFO: strategy 2 selected, running vanilla alphafold to get the msa file")
         args.VA = 'Y'
