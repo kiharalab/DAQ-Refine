@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e  # Exit on any error
-set -x  # Echo all commands
+# set -x  # Echo all commands
 set -o pipefail  # Exit if any command in a pipeline fails
 
 echo "INFO : DAQ-refine started"
@@ -74,7 +74,7 @@ echo "INFO: STEP-4 Visualize structure quality Done"
 echo "INFO: STEP-5 write job yml Started"
 
 which python3
-python3 writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
+$CRYOREAD_PYTHON writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
 echo "INFO: STEP-5 write job yml Done"
 
 echo $output_dir
