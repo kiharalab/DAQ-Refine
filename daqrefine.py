@@ -165,7 +165,7 @@ class Daqrefine:
         set_working_directory(args.output_path)
         
         self._cleanup_folders(["results", "Vanilla_AF2_results", "DAQ", "template"],args)
-        self._cleanup_files_with_suffixes([".a3m", ".csv", ".log", ".txt"],args)
+        self._cleanup_files_with_suffixes([".a3m", ".csv", ".txt"],args)
 
     def _cleanup_folders(self, folders,args):
         for folder in folders:
