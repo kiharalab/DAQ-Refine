@@ -79,9 +79,6 @@ def get_arguments():
     parser.add_argument('--VA', type=str, default='',
                     help='Whether to run VA to get the msa file')
 
-    parser.add_argument('--resolution', type=str, default='3.43',
-                        help='Specify the resolution in the relaxation',required=True)
-
     args = parser.parse_args()
 
     return args
@@ -90,41 +87,34 @@ def main():
     # Get arguments (this function needs to be implemented based on the original code)
     args = get_arguments()
 
-    # run s1
-    print("INFO: STEP-1: Running strategy 1")
-    args.str_mode = 'strategy 1'
-    args.VA = 'N'
-    s1 = Daqrefine(
-        args=args
-    )
-    # clean up the directory
-    s1.clean_up(args)
-    # run the s1 modeling
-    s1.run_modeling()
-
-    # run s2
     # run vanilla alphafold to get msa file
-    print("INFO: STEP-2: Running Vanilla AF2")
+    
     vanilla_af2_result = None
-    args.str_mode = 'strategy 2'
-    args.VA = 'Y'
-    vanilla_af2_result = Daqrefine(
-        args=args
-    )
-    # run vanilla alphafold modeling
-    vanilla_af2_result.run_modeling()
-    a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
-    args.cust_msa_path = a3m_files[0]
-
+    if args.str_mode == 'strategy 2':
+        print("INFO: strategy 2 selected, running vanilla alphafold to get the msa file")
+        args.VA = 'Y'
+        vanilla_af2_result = Daqrefine(
+            args=args
+        )
+        # clean up the directory
+        vanilla_af2_result.clean_up(args)
+        # run modeling
+        vanilla_af2_result.run_modeling()
+        a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
+        args.cust_msa_path = a3m_files[0]
+    
+    # Create an instance of the ProteinModeling class
     args.VA = 'N'
-    s2 = Daqrefine(
+
+
+    modeling = Daqrefine(
         args=args
     )
     
-    # run the s2 modeling process
-    print("STEP-3: Running strategy 2")
-    s2.run_modeling()
-
+    # Run the modeling process
+    if args.str_mode == 'strategy 1':
+        modeling.clean_up(args)
+    modeling.run_modeling()
 
 if __name__ == '__main__':
     main()

@@ -83,7 +83,6 @@ class Daqrefine:
         self.template_mode = args.template_mode
         self.str_mode = args.str_mode
         self.pdb_input_path = args.pdb_input_path
-        self.resolution = args.resolution
 
         if args.VA == 'Y':
             self.str_mode = 'Vanilla AF2'
@@ -141,6 +140,7 @@ class Daqrefine:
 
         # parameters used in display
         self.dispaly_images = False
+        self.rank_num = 1 #@param ["1", "2", "3", "4", "5"] {type:"raw"}
         self.color = '' #@param ["chain", "lDDT", "rainbow"]
         self.show_sidechains = False #@param {type:"boolean"}
         self.show_mainchains = False #@param {type:"boolean"}
@@ -150,7 +150,6 @@ class Daqrefine:
         self.pdb_filename = ''
         # self.pdb_file = ''
         self.model_name = ''
-        
 
         # parrameters in rerun DAQ
         self.rerun_daq_result_path = ''
@@ -165,7 +164,7 @@ class Daqrefine:
     def clean_up(self,args):
         set_working_directory(args.output_path)
         
-        self._cleanup_folders(["results_s1","results_s2", "Vanilla_AF2_results", "DAQ", "template"],args)
+        self._cleanup_folders(["results", "Vanilla_AF2_results", "DAQ", "template"],args)
         self._cleanup_files_with_suffixes([".a3m", ".csv", ".txt"],args)
 
     def _cleanup_folders(self, folders,args):
@@ -672,10 +671,8 @@ class Daqrefine:
 
         if self.str_mode == "Vanilla AF2":
             self.result_dir = f"{self.output_path}/Vanilla_AF2_results"
-        elif self.str_mode ==  "strategy 1":
-            self.result_dir = f"{self.output_path}/S1_results"
         else:
-            self.result_dir = f"{self.output_path}/S2_results"
+            self.result_dir = f"{self.output_path}/results"
         os.makedirs(self.result_dir, exist_ok=True)
         self.log_filename = os.path.join(self.result_dir,"colabfold_log.txt")
         if not os.path.isfile(self.log_filename) or 'logging_setup' not in globals():
@@ -743,88 +740,171 @@ class Daqrefine:
         
         return destination_path
     
+    # TODO change the html show way to save figures
+    def show_pdb(self,rank_num=1, show_sidechains=False, show_mainchains=False, color="lDDT"):
+        self.model_name = f"rank_{rank_num}"
+        view = py3Dmol.view(js='https://3dmol.org/build/3Dmol.js',)
+        # TODO change pdb_file such a stupid name
+        view.addModel(open(self.pdb_file[0],'r').read(),'pdb')
+
+        if color == "lDDT":
+            view.setStyle({'cartoon': {'colorscheme': {'prop':'b','gradient': 'roygb','min':50,'max':90}}})
+        elif color == "rainbow":
+            view.setStyle({'cartoon': {'color':'spectrum'}})
+        elif color == "chain":
+            chains = len(self.queries[0][1]) + 1 if self.is_complex else 1
+            for n,chain,color in zip(range(chains),alphabet_list,pymol_color_list):
+                view.setStyle({'chain':chain},{'cartoon': {'color':color}})
+
+        if show_sidechains:
+            BB = ['C','O','N']
+            view.addStyle({'and':[{'resn':["GLY","PRO"],'invert':True},{'atom':BB,'invert':True}]},
+                                {'stick':{'colorscheme':f"WhiteCarbon",'radius':0.3}})
+            view.addStyle({'and':[{'resn':"GLY"},{'atom':'CA'}]},
+                                {'sphere':{'colorscheme':f"WhiteCarbon",'radius':0.3}})
+            view.addStyle({'and':[{'resn':"PRO"},{'atom':['C','O'],'invert':True}]},
+                                {'stick':{'colorscheme':f"WhiteCarbon",'radius':0.3}})
+        if show_mainchains:
+            BB = ['C','O','N','CA']
+            view.addStyle({'atom':BB},{'stick':{'colorscheme':f"WhiteCarbon",'radius':0.3}})
+
+        view.zoomTo()
+        return view
     
     
-    def align_structure(self,results):
+    def display_structure(self,results):
+        self.rank_num = 1 #@param ["1", "2", "3", "4", "5"] {type:"raw"}
         self.color = "lDDT" #@param ["chain", "lDDT", "rainbow"]
         self.show_sidechains = False #@param {type:"boolean"}
         self.show_mainchains = False #@param {type:"boolean"}
 
-            
-        self.rerun_daq_result_path = os.path.join(self.output_path,"DAQ")
-        # input_map = os.path.join(self.output_path,"input_resize.mrc")
-        # input_pdb = os.path.join(self.rerun_daq_result_path,"DAQ/input.pdb")
+        self.tag = results["rank"][0][self.rank_num - 1]
+        self.jobname_prefix = ".custom" if self.msa_mode == "custom" else ""
+        self.pdb_filename = os.path.join(self.output_path,f"results/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb")
 
-        set_working_directory(self.output_path)
-
-        rank_range = []
-        if self.str_mode == "strategy 1":
-            rank_range = [1,2]
-        else:
-            rank_range = [1,2,3,4,5]
-        for rank_num in rank_range:
-            self.tag = results["rank"][0][rank_num - 1]
-            self.jobname_prefix = ".custom" if self.msa_mode == "custom" else ""
-            self.pdb_filename = f"{self.result_dir}/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb"
-
-            # mkdir DAQ
-            if not os.path.exists("DAQ"):
-                os.mkdir("DAQ")
-
-            if not os.path.exists(self.pdb_filename):
-                print(f"File '{self.pdb_filename}' not found.")
-                exit(0)
-
-            if self.str_mode=="strategy 1":
-                temp_tag = self.tag + "_s1"
-            elif self.str_mode=="strategy 2":
-                temp_tag = self.tag + "_s2"
-            else:
-                temp_tag = self.tag + "_af2"
-            # MMalign
-            self.mmalign(self.pdb_filename,temp_tag)
-            # ROSETTA3 relaxation
-            self.rosetta_relaxation(os.path.join(self.output_path,f"DAQ/{temp_tag}"))
-
-    
-    def mmalign(self,input_pdb,tag):
-        if not os.path.exists(os.path.join(self.output_path),f"DAQ/{tag}"):
-            os.mkdir(os.path.join(self.output_path,f"DAQ/{tag}"))
-        aligned_output_dir = os.mkdir(os.path.join(self.output_path),f"DAQ/{tag}")
-        try:
-            print('align structure to input map')
-            result = subprocess.run([self.mmalign_path, input_pdb, self.pdb_input_path, "-o", f"{aligned_output_dir}/input.pdb"], check=True, capture_output=True, text=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error executing {self.mmalign_path}. Return code: {e.returncode}")
-            print(f"Output: {e.output}")
-            print(f"Error: {e.stderr}")
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-    
-    # TODO figure out the parameters for paths
-    def rosetta_relaxation(self,input_dir):
-        set_working_directory(input_dir)
-        shutil.copy(os.path.join(self.output_path,"input_resize.mrc"),"MAP.mrc")
-        ROSETTA3 = os.path.expanduser("/home/kihara/gterashi/bin/rosetta_bin_linux_2018.33.60351_bundle/main")
-        command = [
-            os.path.join(ROSETTA3, "source/bin/rosetta_scripts.static.linuxgccrelease"),
-            "-database", os.path.join(ROSETTA3, "database/"),
-            "-in::file::s", os.path.join(input_dir, "input.pdb"),
-            "-parser::protocol", os.path.join(self.emweb_daqrefine_path, "B_relax_density.xml"),
-            "-ignore_unrecognized_res",
-            "-edensity::mapreso", self.resolution,
-            "-edensity::cryoem_scatterers",
-            "-crystal_refine",
-            "-beta",
-            "-out::suffix", "_relax",
-            "-default_max_cycles", "200"
-        ]
-
-        result = subprocess.run(command, capture_output=True, text=True)
+        self.rerun_daq()
+        # os.rename(self.pdb_filename, f"input.pdb")
         
-        print(result.stdout)
-        print(result.stderr, file=sys.stderr)
-        return       
+        # self.pdb_file = glob.glob(self.pdb_filename)
+
+        
+
+        # TODO: save figure
+        # self.show_pdb(self.rank_num, self.show_sidechains, self.show_mainchains, self.color).show()
+        # if self.color == "lDDT":
+        #     plot_plddt_legend().show()
+
+    def image_to_data_url(self,filename):
+        ext = filename.split('.')[-1]
+        prefix = f'data:image/{ext};base64,'
+        with open(filename, 'rb') as f:
+            img = f.read()
+        return prefix + base64.b64encode(img).decode('utf-8')
+    
+    def display_html(self):
+
+        # see: https://stackoverflow.com/a/53688522
+
+
+        # pae = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_pae.png"))
+        # cov = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_coverage.png"))
+        # plddt = self.image_to_data_url(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_plddt.png"))
+
+        pae = self.save_image(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_pae.png"))
+        cov = self.save_image(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_coverage.png"))
+        plddt = self.save_image(os.path.join(self.jobname,f"{self.jobname}{self.jobname_prefix}_plddt.png"))
+        display(HTML(f"""
+        <style>
+        img {{
+            float:left;
+        }}
+        .full {{
+            max-width:100%;
+        }}
+        .half {{
+            max-width:50%;
+        }}
+        @media (max-width:640px) {{
+            .half {{
+            max-width:100%;
+            }}
+        }}
+        </style>
+        <div style="max-width:90%; padding:2em;">
+        <h1>Plots for {escape(self.jobname)}</h1>
+        <img src="{pae}" class="full" />
+        <img src="{cov}" class="half" />
+        <img src="{plddt}" class="half" />
+        </div>
+        """))
+    
+    def rerun_daq(self):
+        
+        set_working_directory(self.output_path)
+        new_pdb = self.pdb_filename
+        # print(new_pdb)
+
+        if not os.path.exists("DAQ"):
+            os.mkdir("DAQ")
+
+        if os.path.exists(self.pdb_filename):
+            try:
+                shutil.copy(self.pdb_filename, "DAQ/input.pdb")
+            except Exception as e:
+                print(f"Error copying file: {e}")
+        else:
+            print(f"File '{self.pdb_filename}' not found.")
+        self.rerun_daq_result_path = os.path.join(self.output_path,"DAQ")
+        input_map = os.path.join(self.output_path,"input_resize.mrc")
+        input_pdb = os.path.join(self.rerun_daq_result_path,"DAQ/input.pdb")
+
+        if self.str_mode in ["strategy 1", "strategy 2"]:
+            # align structure to input map
+            try:
+                print('align structure to input map')
+                result = subprocess.run([self.mmalign_path, self.pdb_filename, self.pdb_input_path, "-o", "DAQ/input.pdb"], check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error executing {self.mmalign_path}. Return code: {e.returncode}")
+                print(f"Output: {e.output}")
+                print(f"Error: {e.stderr}")
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+
+            # rerun DAQ
+        #     try:
+        #         set_working_directory(self.emweb_daq_path)
+        #         # result = subprocess.run(["conda", "deactivate"], capture_output=True, text=True, shell=True)
+        #         # if result.returncode != 0:
+        #         #     print("Failed to deactivate Conda environment")
+        #         #     print(result.stderr)
+        #         #     exit(1)
+        #         # result = subprocess.run(["module", "load", "cryoread"], capture_output=True, text=True, shell=True)
+        #         # if result.returncode != 0:
+        #         #     print("Failed to load cryoread")
+        #         #     print(result.stderr)
+        #         #     exit(1)
+        #         print('rerun DAQ')
+        #         result = subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"], shell=True)
+        #     except subprocess.CalledProcessError as e:
+        #         print(f"Error executing DAQ. Return code: {e.returncode}")
+        #         print(f"Output: {e.output}")
+        #         print(f"Error: {e.stderr}")
+        #     except Exception as e:
+        #         print(f"Unexpected error: {e}")
+
+        # else:
+        #     # rerun DAQ
+        #     try:
+        #         set_working_directory(self.emweb_daq_path)
+        #         subprocess.run(["python", "main.py", "--mode=0", "-F", input_map, "-P", input_pdb,"--output",self.rerun_daq_result_path, "--window","9", "--stride", "2","--batch_size","512"])
+        #     except subprocess.CalledProcessError as e:
+        #         print(f"Error executing DAQ. Return code: {e.returncode}")
+        #         print(f"Output: {e.output}")
+        #         print(f"Error: {e.stderr}")
+        #     except Exception as e:
+        #         print(f"Unexpected error: {e}")
+    
+        
 
     
 
@@ -849,7 +929,8 @@ class Daqrefine:
             print(f"Error in get_input(): {e}")
             exit(1)
 
-        print("INFO: Input Protein Sequence and DAQ result file started")
+        if self.str_mode != "Vanilla AF2":
+            print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
         # print("INFO: STEP-1 Input Protein Sequence and DAQ result file started")
 
         try:
@@ -866,8 +947,9 @@ class Daqrefine:
             print(f"Error in msa(): {e}")
             exit(1)
 
-        print("INFO: Input Protein Sequence and DAQ result file Done")
-        print("INFO: Modeling Part started")
+        if self.str_mode != "Vanilla AF2":
+            print("INFO: STEP-1 Input Protein Sequence and DAQ result file Done")
+            print("INFO: STEP-2 Modeling Part started")
 
         try:
             self.msa_settings()
@@ -899,13 +981,14 @@ class Daqrefine:
             print(f"Error in prediction(): {e}")
             exit(1)
 
-
-        print("INFO: Modeling Part Done")
+        if self.str_mode != "Vanilla AF2":
+            print("INFO: STEP-2 Modeling Part Done")
         try:
-            self.align_structure(results)
-            print("Align structures finished.")
+            if self.str_mode != "Vanilla AF2":
+                self.display_structure(results)
+                print("Store structure finished.")
         except Exception as e:
-            print(f"Error in align_structure(results): {e}")
+            print(f"Error in display_structure(results): {e}")
             exit(1)
         
 
@@ -917,4 +1000,5 @@ class Daqrefine:
         print("Number of models to use:", self.num_relax)
         print("Template mode:", self.template_mode)
         print("Output directory:", self.rerun_daq_result_path)
+        print("Final structure:", self.final_pdb_path)
         print("====================================================================Modeling finished====================================================================")
