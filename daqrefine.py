@@ -754,6 +754,10 @@ class Daqrefine:
 
         set_working_directory(self.output_path)
 
+        # mkdir DAQ
+        if not os.path.exists(self.rerun_daq_result_path):
+            os.mkdir(self.rerun_daq_result_path)
+
         rank_range = []
         if self.str_mode == "strategy 1":
             rank_range = [1,2]
@@ -764,9 +768,7 @@ class Daqrefine:
             self.jobname_prefix = ".custom" if self.msa_mode == "custom" else ""
             self.pdb_filename = f"{self.result_dir}/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb"
 
-            # mkdir DAQ
-            if not os.path.exists("DAQ"):
-                os.mkdir("DAQ")
+
 
             if not os.path.exists(self.pdb_filename):
                 print(f"File '{self.pdb_filename}' not found.")
@@ -785,6 +787,7 @@ class Daqrefine:
 
     
     def mmalign(self,input_pdb,tag):
+        set_working_directory(self.output_path)
         if not os.path.exists(os.path.join(self.output_path,f"DAQ/{tag}")):
             os.mkdir(os.path.join(self.output_path,f"DAQ/{tag}"))
         aligned_output_dir = os.path.join(self.output_path,f"DAQ/{tag}")
