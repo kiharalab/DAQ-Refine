@@ -785,9 +785,9 @@ class Daqrefine:
 
     
     def mmalign(self,input_pdb,tag):
-        if not os.path.exists(os.path.join(self.output_path),f"DAQ/{tag}"):
+        if not os.path.exists(os.path.join(self.output_path,f"DAQ/{tag}")):
             os.mkdir(os.path.join(self.output_path,f"DAQ/{tag}"))
-        aligned_output_dir = os.mkdir(os.path.join(self.output_path),f"DAQ/{tag}")
+        aligned_output_dir = os.path.join(self.output_path,f"DAQ/{tag}")
         try:
             print('align structure to input map')
             result = subprocess.run([self.mmalign_path, input_pdb, self.pdb_input_path, "-o", f"{aligned_output_dir}/input.pdb"], check=True, capture_output=True, text=True)
@@ -885,6 +885,7 @@ class Daqrefine:
             print(f"Error in check_dependencies(): {e}")
             exit(1)
 
+        results = None
         try:
             
             check_gpu_with_torch()
