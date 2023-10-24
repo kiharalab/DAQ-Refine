@@ -57,7 +57,7 @@ def reverse_pdb(filename, new_file_name):
                     wfile.write(line)
 
 def visualize_structure_quality_3d(output_path):
-    refined_result_path = os.path.join(output_path,"DAQ")
+    refined_result_path = output_path
     final_pdb_path = os.path.join(refined_result_path, "daq_score_w9_reverse.pdb")
     reverse_pdb(os.path.join(refined_result_path, "daq_score_w9.pdb"), final_pdb_path)
 
