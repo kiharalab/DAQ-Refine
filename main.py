@@ -49,7 +49,7 @@ def get_arguments():
 
     # Add arguments
     parser.add_argument('--str_mode', type=str, default='strategy 2',
-                        help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.',required=True)
+                        help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.')
     
     # MENSMMFISRSLRRPVTALNCNLQSVRTVIYLHKGPRINGLRRDPESYLRNPSGVLFTEVNAKECQDKVRSILQLPKYGINLSNELILQCLTHKSFAHGSKPYNEKLNLLGAQFLKLQTCIHSLKNGSPAESCENGQLSLQFSNLGTKFAKELTSKNTACTFVKLHNLGPFIFWKMRDPIKDGHINGETTIFASVLNAFIGAILSTNGSEKAAKFIQGSLLDKEDLHSLVNIANENVASAKAKISDKENKAFL
     parser.add_argument('--query_sequence', type=str, default='',
