@@ -14,17 +14,15 @@ module load miniconda38
 #export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 #export CUDA_VISIBLE_DEVICES=1
 #Inputs
-strategy="$1 $2"
-jobname=$3
-pdb_input_path="${5}/daq_score_w9.pdb"
-input_dir=$4
-output_dir=$5
-map=$6
-structure=$7
-query_sequence=$8
-# msa_file=$9
+resolution=$1
+jobname=$2
+pdb_input_path="${4}/daq_score_w9.pdb"
+input_dir=$3
+output_dir=$4
+map=$5
+structure=$6
+query_sequence=$7
 
-# echo $query_sequence
 
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
@@ -48,7 +46,7 @@ conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  
 
 # which python3
 
-python3 main.py --str_mode="$strategy" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir" --query_sequence="$query_sequence" || { echo "main.py failed"; exit 1; }
+python3 main.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="$input_dir" --output_path="$output_dir" --query_sequence="$query_sequence" || { echo "main.py failed"; exit 1; }
 
 # rerun DAQ
 echo "INFO: STEP-4 Computer refined DAQ Started"
@@ -74,30 +72,7 @@ done
 
 echo "INFO: STEP-4 Computer refined DAQ Done"
 
-echo "INFO: STEP-5 Compare and get the best score DAQ result started"
-# 
-
-echo "INFO: STEP-5 Compare and get the best score DAQ result Done"
-
-
-echo "INFO: STEP-6 Visualize structure quality Started"
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine" || { echo "Failed to change directory"; exit 1; }
 echo "INFO: leave DAQ dir, enter DAQ_refine"
-
-python3 reverse.py $output_dir  || { echo "reverse.py failed"; exit 1; }
-echo "INFO: STEP-6 Visualize structure quality Done"
-
-
-echo "INFO: STEP-7 write job yml Started"
-
-# which python3
-$CRYOREAD_PYTHON writejobyml.py $daqrefined_output_dir  || { echo "writejobyml.py failed"; exit 1; }
-echo "INFO: STEP-7 write job yml Done"
-
-echo $output_dir
-
-echo "==================================================DAQ-Refine Finished=================================================="
-echo "Results stored in: "
-echo "$daqrefined_output_dir"
-echo "==================================================DAQ-Refine Finished=================================================="
+$CRYOREAD_PYTHON writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 

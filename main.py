@@ -75,9 +75,6 @@ def get_arguments():
 
     parser.add_argument('--output_path', type=str, default='',
                         help='Path to the directory of the output files.',required=True)
-    
-    parser.add_argument('--VA', type=str, default='',
-                    help='Whether to run VA to get the msa file')
 
     parser.add_argument('--resolution', type=str, default='3.43',
                         help='Specify the resolution in the relaxation',required=True)
@@ -93,7 +90,7 @@ def main():
     # run s1
     print("INFO: STEP-1: Running strategy 1")
     args.str_mode = 'strategy 1'
-    args.VA = 'N'
+
     s1 = Daqrefine(
         args=args
     )
@@ -106,23 +103,23 @@ def main():
     # run vanilla alphafold to get msa file
     print("INFO: STEP-2: Running Vanilla AF2")
     vanilla_af2_result = None
-    args.str_mode = 'strategy 2'
-    args.VA = 'Y'
+    args.str_mode = 'Vanilla AF2'
     vanilla_af2_result = Daqrefine(
         args=args
     )
     # run vanilla alphafold modeling
     vanilla_af2_result.run_modeling()
+
+    print("STEP-3: Running strategy 2")
+    args.str_mode = 'strategy 2'
     a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
     args.cust_msa_path = a3m_files[0]
 
-    args.VA = 'N'
     s2 = Daqrefine(
         args=args
     )
     
     # run the s2 modeling process
-    print("STEP-3: Running strategy 2")
     s2.run_modeling()
 
 

@@ -47,14 +47,6 @@ def visualize_structure_quality_2d(output_path):
         final_pdb_path3 = os.path.join(refined_result_path, "daq_score_w9_" + str(chain_name) + "_reverse.pdb")
         reverse_pdb(output_pdb_path3, final_pdb_path3)
 
-# print("INFO: STEP-3 Computer refined DAQ Started")
-# try:
-#     self.rerun_daq()  
-# except Exception as e:
-#     print(f"Error in rerun_daq(): {e}")
-#     exit(1)
-# print("INFO: STEP-3 Computer refined DAQ Done")
-# print("INFO: STEP-4 Visualize structure quality Started")
 output_path = sys.argv[1]
 
 try:
@@ -64,4 +56,3 @@ try:
 except Exception as e:
     print(f"Error in visualize_structure_quality(): {e}")
     exit(1)
-# print("INFO: STEP-4 Visualize structure quality Done")

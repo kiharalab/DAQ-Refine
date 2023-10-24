@@ -85,9 +85,6 @@ class Daqrefine:
         self.pdb_input_path = args.pdb_input_path
         self.resolution = args.resolution
 
-        if args.VA == 'Y':
-            self.str_mode = 'Vanilla AF2'
-
         # envrionment variables
         from sys import version_info
         self.python_version = f"{version_info.major}.{version_info.minor}"
@@ -804,13 +801,14 @@ class Daqrefine:
     # TODO figure out the parameters for paths
     def rosetta_relaxation(self,input_dir):
         set_working_directory(input_dir)
+        shutil.copy(os.path.join(self.emweb_daqrefine_path, "B_relax_density.xml"),"B_relax_density.xml")
         shutil.copy(os.path.join(self.output_path,"input_resize.mrc"),"MAP.mrc")
         ROSETTA3 = os.path.expanduser("/home/kihara/gterashi/bin/rosetta_bin_linux_2018.33.60351_bundle/main")
         command = [
             os.path.join(ROSETTA3, "source/bin/rosetta_scripts.static.linuxgccrelease"),
             "-database", os.path.join(ROSETTA3, "database/"),
-            "-in::file::s", os.path.join(input_dir, "input.pdb"),
-            "-parser::protocol", os.path.join(self.emweb_daqrefine_path, "B_relax_density.xml"),
+            "-in::file::s", "input.pdb",
+            "-parser::protocol", "B_relax_density.xml",
             "-ignore_unrecognized_res",
             "-edensity::mapreso", self.resolution,
             "-edensity::cryoem_scatterers",
@@ -825,9 +823,6 @@ class Daqrefine:
         print(result.stdout)
         print(result.stderr, file=sys.stderr)
         return       
-
-    
-
 
 
     def run_modeling(self):
