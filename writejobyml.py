@@ -83,7 +83,7 @@ def read_chain_set(filename):
     return chain_set
 
 def visualize_structure_quality_2d(output_path):
-    refined_result_path = os.path.join(output_path,"DAQ")
+    refined_result_path = output_path
     output_pdb_path2 = os.path.join(refined_result_path, "daq_score_w9.pdb")
     chain_list = read_chain_set(output_pdb_path2)
     chain_list = list(chain_list)
