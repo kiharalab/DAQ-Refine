@@ -20,7 +20,7 @@ def find_highest_score_directory(path):
 
     # Iterate through each directory with the specified extensions
     for extension in ['s1', 's2', 'af2']:
-        for directory in glob.glob(os.path.join(current_path, f'*.{extension}')):
+        for directory in glob.glob(os.path.join(current_path, f'*_{extension}')):
             # Construct the full path of the file
             file_path = os.path.join(directory, 'daq_raw_score.pdb')
 
