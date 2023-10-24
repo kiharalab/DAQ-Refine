@@ -124,7 +124,9 @@ with mrcfile.open(map_path,permissive=True) as mrc:
 data=data[data>0]
 sort_data=np.sort(data)
 contour=float(sort_data[int(0.05*len(sort_data))])
-cleaned_directory = highest_directory.replace(output_folder, '', 1)
+cleaned_directory = highest_directory.replace(job_folder, '', 1)
+cleaned_directory = cleaned_directory.lstrip('/')
+print(cleaned_directory)
 with open(f'{job_folder}/job.yml', 'w') as outfile:
     outfile.write("pdbfiles: %s/daq_score_w9_reverse.pdb\n"%cleaned_directory)
     outfile.write("contour: %f\n"%contour)
