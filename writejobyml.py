@@ -12,7 +12,7 @@ job_folder = sys.argv[1]
 
 def find_highest_score_directory(path):
     # Initialize the highest score and the corresponding directory
-    highest_score = 0
+    highest_score = -1000
     highest_score_directory = ""
 
     # Get the current path
