@@ -23,7 +23,7 @@ map=$6
 structure=$7
 query_sequence=$8
 
-
+chain_folder="chain_{$chain_id}"
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
@@ -32,7 +32,7 @@ module load cryoread || { echo "Failed to load cryoread"; exit 1; }
 CRYOREAD_PYTHON="/apps/miniconda38/envs/cryoread/bin/python3"
 
 # echo $@
-$CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output="${output_dir}/${chain_id}" --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
+$CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output="${output_dir}/${chain_folder}" --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
 # $CRYOREAD_PYTHON writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
 echo "INFO : STEP-0 DAQ-refine Done"
@@ -45,15 +45,15 @@ module load cuda/11.8
 conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  || { echo "Failed to activate daq_refine environment"; exit 1; }
 
 # which python3
-pdb_input_path="${output_dir}/${chain_id}/daq_score_w9.pdb"
-python3 main.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_id}" --output_path="${output_dir}/${chain_id}" --query_sequence="$query_sequence" || { echo "main.py failed"; exit 1; }
+pdb_input_path="${output_dir}/${chain_folder}/daq_score_w9.pdb"
+python3 main.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_folder}" --output_path="${output_dir}/${chain_folder}" --query_sequence="$query_sequence" || { echo "main.py failed"; exit 1; }
 
 # rerun DAQ
 echo "INFO: STEP-4 Computer refined DAQ Started"
 
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ" || { echo "Failed to change directory"; exit 1; }
 
-daqrefined_daq_dir="${output_dir}/${chain_id}/DAQ"
+daqrefined_daq_dir="${output_dir}/${chain_folder}/DAQ"
 # daqrefined_structure="${output_dir}/DAQ/input.pdb"
 conda deactivate || { echo "Failed to deactivate Conda environment"; exit 1; }
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
@@ -74,6 +74,6 @@ echo "INFO: STEP-4 Computer refined DAQ Done"
 
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine" || { echo "Failed to change directory"; exit 1; }
 echo "INFO: leave DAQ dir, enter DAQ_refine"
-yml_dir="${output_dir}/${chain_id}"
+yml_dir="${output_dir}/${chain_folder}"
 $CRYOREAD_PYTHON writejobyml.py $yml_dir  || { echo "writejobyml.py failed"; exit 1; }
 
