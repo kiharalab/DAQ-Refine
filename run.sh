@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e  # Exit on any error
-# set -x  # Echo all commands
+set -x  # Echo all commands
 set -o pipefail  # Exit if any command in a pipeline fails
 
 echo "INFO : DAQ-refine started"
@@ -23,7 +23,7 @@ map=$6
 structure=$7
 query_sequence=$8
 
-chain_folder="chain_{$chain_id}"
+chain_folder="chain_${chain_id}"
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
