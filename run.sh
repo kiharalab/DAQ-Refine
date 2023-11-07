@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e  # Exit on any error
-set -x  # Echo all commands
+# set -x  # Echo all commands
 set -o pipefail  # Exit if any command in a pipeline fails
 
 echo "INFO : DAQ-refine started"
