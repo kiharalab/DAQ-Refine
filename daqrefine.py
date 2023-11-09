@@ -89,14 +89,10 @@ class Daqrefine:
         from sys import version_info
         self.python_version = f"{version_info.major}.{version_info.minor}"
         self.emweb_path = "/bio/kihara-web/www/em/emweb-jobscheduler"
-        # self.emweb_daq_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine"
         self.emweb_daqrefine_path = os.path.join(self.emweb_path,"algorithms/DAQ-Refine")
         self.emweb_daq_path = os.path.join(self.emweb_path,"algorithms/DAQ")
-        # self.mmalign_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/MMalign"
         self.mmalign_path = os.path.join(self.emweb_daqrefine_path,"MMalign")
-        # self.maxit_path = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit"
         
-        # self.RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
         self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
         self.maxit_path = os.path.join(self.RCSBROOT,"bin/maxit")
 
@@ -273,13 +269,13 @@ class Daqrefine:
 
         if self.str_mode in ("strategy 1", "strategy 2"):
             try:
-                self.TrimDAQ(self.pdb_input_path, 0.0, self.input_path+'/1tmp.pdb')
+                self.TrimDAQ(self.pdb_input_path, 0.0, self.output_path+'/1tmp.pdb')
             except Exception as e:
                 print(f"Error while trimming DAQ: {e}")
                 return False
 
             try:
-                subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.input_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
+                subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.output_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
                 self.daq_file = self.output_path+'/1tmp.cif'
             except subprocess.CalledProcessError as e:
                 print(f"Maxit subprocess failed: {e}")
