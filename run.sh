@@ -24,6 +24,7 @@ structure=$7
 query_sequence=$8
 
 chain_folder="chain_${chain_id}"
+echo "INFO: start DAQ-refine for chain ${chain_id}"
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 # Acitivate the conda enviroment
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
@@ -35,7 +36,7 @@ CRYOREAD_PYTHON="/apps/miniconda38/envs/cryoread/bin/python3"
 $CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output="${output_dir}/${chain_folder}" --window 9 --stride 2 --batch_size=64  || { echo "main.py failed"; exit 1; }
 # $CRYOREAD_PYTHON writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
-echo "INFO : STEP-0 DAQ-refine Done"
+echo "INFO : STEP-0 DAQ Done"
 
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine" || { echo "Failed to change directory"; exit 1; }
 echo "INFO: leave DAQ dir, enter DAQ_refine"
