@@ -17,3 +17,4 @@ eval "$(conda shell.bash hook)"
 module load cryoread
 which python3
 python3 main.py --mode=0 -F=$map -P=$structure --output=$output_dir --window 9 --stride 2 --batch_size=64
+python3 gen_score.py $output_dir
