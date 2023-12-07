@@ -9,6 +9,7 @@ import glob
 print("INFO: STEP-5 Compare and get the best score DAQ result started")
 output_folder = os.path.join(sys.argv[1],"DAQ")
 working_folder = sys.argv[1]
+chain_id = sys.argv[2]
 job_folder = os.path.dirname(working_folder)
 
 def find_highest_score_directory(path):
@@ -135,7 +136,7 @@ with open(f'{working_folder}/job.yml', 'w') as outfile:
 
 print("INFO: STEP-7 write job yml Done") 
 
-print("==================================================DAQ-Refine Finished==================================================")
+print("==================================================DAQ-Refine for Chain %s Finished=================================================="%chain_id)
 print("Results stored in: ")
 print(highest_directory)
-print("==================================================DAQ-Refine Finished==================================================")
+print("==================================================DAQ-Refine for Chain %s Finished=================================================="%chain_id)

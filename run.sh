@@ -76,5 +76,5 @@ echo "INFO: STEP-4 Computer refined DAQ Done"
 cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine" || { echo "Failed to change directory"; exit 1; }
 echo "INFO: leave DAQ dir, enter DAQ_refine"
 yml_dir="${output_dir}/${chain_folder}"
-$CRYOREAD_PYTHON writejobyml.py $yml_dir  || { echo "writejobyml.py failed"; exit 1; }
+$CRYOREAD_PYTHON writejobyml.py $yml_dir $chain_id  || { echo "writejobyml.py failed"; exit 1; }
 
