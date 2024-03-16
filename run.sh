@@ -49,6 +49,7 @@ conda activate /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine  
 pdb_input_path="${output_dir}/${chain_folder}/daq_score_w9.pdb"
 python3 main.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_folder}" --output_path="${output_dir}/${chain_folder}" --query_sequence="$query_sequence"
 status=$?
+echo "INFO: DAQ-refine status: $status"
 if [ $status -eq 1 ]; then
    echo "Failed to do daq_refine."
    exit 1
