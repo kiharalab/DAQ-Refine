@@ -918,4 +918,4 @@ class Daqrefine:
         print("Template mode:", self.template_mode)
         print("Output directory:", self.rerun_daq_result_path)
         print("====================================================================Modeling finished====================================================================")
-        return 1
+        return 0

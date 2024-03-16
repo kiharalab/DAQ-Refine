@@ -123,8 +123,10 @@ def main():
     
     # run the s2 modeling process
     s2.run_modeling()
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    ret = main()
+    sys.exit(ret)
 
