@@ -99,6 +99,8 @@ def main():
     # run the s1 modeling
     ret = s1.run_modeling()
     if ret == 2:
+        with open("%s/daqrefine_status.out"%args.output_path,'w') as wfile:
+            wfile.write("%s\n"%ret)
         return 2
 
     # run s2
@@ -123,10 +125,11 @@ def main():
     
     # run the s2 modeling process
     s2.run_modeling()
+    with open("%s/daqrefine_status.out"%args.output_path,'w') as wfile:
+        wfile.write("0\n")
     return 0
 
 
 if __name__ == '__main__':
     ret = main()
-    sys.exit(ret)
 
