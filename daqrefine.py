@@ -843,7 +843,7 @@ class Daqrefine:
                 exit(1)
             if input_success == 2:
                 print("Exiting due to insufficient number of lines in trimmed DAQ file.")
-                exit(2)
+                return 2
         except Exception as e:
             print(f"Error in get_input(): {e}")
             exit(1)
@@ -918,3 +918,4 @@ class Daqrefine:
         print("Template mode:", self.template_mode)
         print("Output directory:", self.rerun_daq_result_path)
         print("====================================================================Modeling finished====================================================================")
+        return 1

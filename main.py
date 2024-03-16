@@ -97,7 +97,9 @@ def main():
     # clean up the directory
     s1.clean_up(args)
     # run the s1 modeling
-    s1.run_modeling()
+    ret = s1.run_modeling()
+    if ret == 2:
+        return 2
 
     # run s2
     # run vanilla alphafold to get msa file
