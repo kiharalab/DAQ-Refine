@@ -4,42 +4,11 @@ import os
 import sys
 import glob
 
-
-# Get the highest score directory
-print("INFO: STEP-5 Compare and get the best score DAQ result started")
 output_folder = os.path.join(sys.argv[1],"DAQ")
 working_folder = sys.argv[1]
 chain_id = sys.argv[2]
 job_folder = os.path.dirname(working_folder)
 status = sys.argv[3]
-
-def find_highest_score_directory(path):
-    # Initialize the highest score and the corresponding directory
-    highest_score = -1000
-    highest_score_directory = ""
-
-    # Get the current path
-    current_path = path
-
-    # Iterate through each directory with the specified extensions
-    for extension in ['s1', 's2', 'af2']:
-        for directory in glob.glob(os.path.join(current_path, f'*_{extension}')):
-            # Construct the full path of the file
-            file_path = os.path.join(directory, 'daq_raw_score.pdb')
-
-            # Check if the file exists
-            if os.path.isfile(file_path):
-                with open(file_path, 'r') as file:
-                    # Read the last line of the file
-                    last_line = file.readlines()[-1]
-                    # Parse the last line to get the AA score
-                    score = float(last_line.split('AA:')[1].strip())
-                    # If this score is higher than the current highest score, update the highest score and the corresponding directory
-                    if score > highest_score:
-                        highest_score = score
-                        highest_score_directory = directory
-
-    return highest_score_directory
 
 if status == "2":
     print("INFO: STEP-7 write job yml Started")
@@ -76,6 +45,37 @@ if status == "2":
     print(working_folder)
     print("==================================================DAQ-Refine for Chain %s Finished=================================================="%chain_id)
     exit(0)
+    
+# Get the highest score directory
+print("INFO: STEP-5 Compare and get the best score DAQ result started")
+
+def find_highest_score_directory(path):
+    # Initialize the highest score and the corresponding directory
+    highest_score = -1000
+    highest_score_directory = ""
+
+    # Get the current path
+    current_path = path
+
+    # Iterate through each directory with the specified extensions
+    for extension in ['s1', 's2', 'af2']:
+        for directory in glob.glob(os.path.join(current_path, f'*_{extension}')):
+            # Construct the full path of the file
+            file_path = os.path.join(directory, 'daq_raw_score.pdb')
+
+            # Check if the file exists
+            if os.path.isfile(file_path):
+                with open(file_path, 'r') as file:
+                    # Read the last line of the file
+                    last_line = file.readlines()[-1]
+                    # Parse the last line to get the AA score
+                    score = float(last_line.split('AA:')[1].strip())
+                    # If this score is higher than the current highest score, update the highest score and the corresponding directory
+                    if score > highest_score:
+                        highest_score = score
+                        highest_score_directory = directory
+
+    return highest_score_directory
 
 
 # Execute the function and print the result

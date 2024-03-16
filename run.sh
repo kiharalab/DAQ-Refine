@@ -50,10 +50,7 @@ pdb_input_path="${output_dir}/${chain_folder}/daq_score_w9.pdb"
 python3 main.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_folder}" --output_path="${output_dir}/${chain_folder}" --query_sequence="$query_sequence"
 status=$(cat ${output_dir}/${chain_folder}/daqrefine_status.out)
 echo "INFO: DAQ-refine status: $status"
-if [ $status -eq 1 ]; then
-   echo "Failed to do daq_refine."
-   exit 1
-elif [ $status -eq 2 ]; then
+if [ $status -eq "2" ]; then
     cd "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine" || { echo "Failed to change directory"; exit 1; }
     echo "INFO: leave DAQ dir, enter DAQ_refine"
     yml_dir="${output_dir}/${chain_folder}"
