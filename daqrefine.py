@@ -242,6 +242,7 @@ class Daqrefine:
         daq = []
         PDB = {}
         lines = ''
+        no_lines = 0
         with open(filename) as f:
             for li in f:
                 if li.startswith('ATOM'):
@@ -256,23 +257,29 @@ class Daqrefine:
                         daq.append(resn)
                     else:
                         lines = lines + li + '\n'
+                        no_lines = no_lines + 1
         
         with open(outfile, 'w') as out:
             out.write(lines)
+        return no_lines
     
     def add_hash(self,x, y):
         return x + "_" + hashlib.sha1(y.encode()).hexdigest()[:5]
 
 
-    def get_input(self):
+    def get_input(self,trim_threshold=50):
         # Extracted logic for getting inputs
 
         if self.str_mode in ("strategy 1", "strategy 2"):
             try:
-                self.TrimDAQ(self.pdb_input_path, 0.0, self.output_path+'/1tmp.pdb')
+                no_lines = self.TrimDAQ(self.pdb_input_path, 0.0, self.output_path+'/1tmp.pdb')
             except Exception as e:
                 print(f"Error while trimming DAQ: {e}")
                 return False
+            
+            if no_lines < trim_threshold:
+                print(f"Number of lines in trimmed DAQ file is less than {trim_threshold}. Ignoring this chain")
+                return 2
 
             try:
                 subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.output_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
@@ -834,6 +841,9 @@ class Daqrefine:
             if not input_success:
                 print("Exiting due to error in input.")
                 exit(1)
+            if input_success == 2:
+                print("Exiting due to insufficient number of lines in trimmed DAQ file.")
+                exit(2)
         except Exception as e:
             print(f"Error in get_input(): {e}")
             exit(1)

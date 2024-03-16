@@ -11,6 +11,7 @@ output_folder = os.path.join(sys.argv[1],"DAQ")
 working_folder = sys.argv[1]
 chain_id = sys.argv[2]
 job_folder = os.path.dirname(working_folder)
+status = sys.argv[3]
 
 def find_highest_score_directory(path):
     # Initialize the highest score and the corresponding directory
@@ -39,6 +40,43 @@ def find_highest_score_directory(path):
                         highest_score_directory = directory
 
     return highest_score_directory
+
+if status == "2":
+    print("INFO: STEP-7 write job yml Started")
+    data = {
+        "pdbfiles":
+        "daq_score_w9_reverse.pdb"
+    }
+    # parent_folder = os.path.dirname(output_folder)
+    check_file=working_folder+"/daq_score_w9.pdb"
+    if os.path.exists(check_file):
+        with open("%s/done.out"%working_folder,'w') as wfile:
+            wfile.write("DONE\n")
+    else:
+        with open("%s/fail.out"%working_folder,'w') as wfile:
+            wfile.write("FAIL\n")
+    import mrcfile
+
+    map_path = os.path.join(job_folder, "input_resize.mrc")
+    with mrcfile.open(map_path,permissive=True) as mrc:
+        data=mrc.data
+    data=data[data>0]
+    sort_data=np.sort(data)
+    contour=float(sort_data[int(0.05*len(sort_data))])
+    with open(f'{working_folder}/job.yml', 'w') as outfile:
+        outfile.write("pdbfiles: daq_score_w9.pdb\n")
+        outfile.write("contour: %f\n"%contour)
+        outfile.write("strings: DAQ-refine is a protocol using <a href='https://em.kiharalab.org/algorithm/daqscore'>DAQ score</a> to evaluate protein models from cryo-EM maps and employs a modified AlphaFold 2 for refining regions with potential errors.<br> The 3D model is colored by <a href='https://www.nature.com/articles/s41592-022-01574-4'>DAQ(AA) score</a> scaled from red (-1.0) to blue (1.0) with a 19 residues sliding window. Here blue indicates good score, while red indicates bad score from DAQ. <br> If you encounter any questions for the scored structure, feel free to email dkihara@purdue.edu, gterashi@purdue.edu and wang3702@purdue.edu.\n")
+        #yaml.dump(data, outfile, default_flow_style=False)
+
+    print("INFO: STEP-7 write job yml Done") 
+
+    print("==================================================DAQ-Refine for Chain %s Finished=================================================="%chain_id)
+    print("Results stored in: ")
+    print(working_folder)
+    print("==================================================DAQ-Refine for Chain %s Finished=================================================="%chain_id)
+    exit(0)
+
 
 # Execute the function and print the result
 highest_directory = find_highest_score_directory(output_folder)
