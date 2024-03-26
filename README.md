@@ -6,11 +6,12 @@
 
 DAQ-Refine leverages the power of DAQ-score and ColabFold for the refinement of protein structures derived from cryo-electron microscopy (cryo-EM) maps. This tool aims to enhance the accuracy and reliability of protein model predictions by providing a comprehensive residue-wise local quality estimation.
 
-### References:
-
-- [1] Terashi, G., Wang, X., Maddhuri Venkata Subramaniya, S. R., Tesmer, J. J., & Kihara, D. (2022). *Residue-wise local quality estimation for protein models from cryo-EM maps*. Nature Methods, 19(9), 1116-1125. [https://doi.org/10.1038/s41592-022-01574-4](https://www.nature.com/articles/s41592-022-01574-4)
-
-- [2] Terashi, G., Wang, X., & Kihara, D. (2023). *Protein model refinement for cryo-EM maps using AlphaFold2 and the DAQ score*. Acta Crystallographica Section D: Structural Biology, 79(1), 10-21. [https://doi.org/10.1107/S2059798322011676](https://doi.org/10.1107/S2059798322011676)
+## Table of Contents
+- [Getting Started with DAQ-Refine](#section-1)
+- [DAQ-Refine Comprehensive Guide](#section-2)
+  - [Local Version Instructions](#subsection-a)
+  - [Colab Instructions](#subsection-b)
+- [References](#references)
 
 
 ## Getting Started with DAQ-Refine
@@ -38,7 +39,7 @@ We also offer a Google Colab notebook for users who prefer an interactive, web-b
 
 This section guides you through creating a Conda environment for DAQ-Refine, including the installation of Python and other dependencies. Ensure [DAQ-score](https://github.com/kiharalab/DAQ) is installed locally under the same path with DAQ-Refine for optimal performance.
 
-### Step 1: Create a Conda Environment
+#### Step 1: Create a Conda Environment
 
 Create and activate a new Conda environment:
 
@@ -47,7 +48,7 @@ conda create -n daq_refine python=3.9
 conda activate daq_refine
 ```
 
-### Step 2: Install Python Dependencies
+#### Step 2: Install Python Dependencies
 Install the required Python packages in your Conda environment:
 
 ```bash
@@ -55,7 +56,7 @@ pip install -r requirements.txt
 ```
 *Note: Adjust the package versions according to your project's requirements.*
 
-### Step 3: Download and Set Up Maxit
+#### Step 3: Download and Set Up Maxit
 Switch to the DAQ-Refine local branch and download Maxit:
 ```bash
 cd /your/path/to/DAQ-Refine
@@ -73,7 +74,7 @@ fi
 ```
 *Note: You may need to install additional dependencies like gcc, make, bison, flex, and csh using your system's package manager (e.g., apt for Ubuntu/Debian or yum for CentOS/RedHat).*
 
-### Step 4: install Biopython
+#### Step 4: install Biopython
 Navigate to your preferred installation path and install Biopython:
 ```bash
 cd /your/path/to/install/biopython
@@ -82,7 +83,7 @@ cd biopython
 pip install .
 ```
 
-### Step 5: install Alphafold/MSA dependencies
+#### Step 5: install Alphafold/MSA dependencies
 Install necessary dependencies for Alphafold and MSA:
 ```bash
 pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'
@@ -96,7 +97,7 @@ conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 python='3
 conda install -y -c conda-forge openmm=7.7.0 python='3.9' pdbfixer
 ```
 
-### Step 6: install MMalign
+#### Step 6: install MMalign
 Download and compile MMalign in your DAQ-Refine directory:
 ```bash
 cd /your/path/to/DAQ-Refine
@@ -104,12 +105,12 @@ wget https://zhanggroup.org/MM-align/bin/module/MMalign.cpp
 g++ -static -O3 -ffast-math -o MMalign MMalign.cpp
 ```
 
-### Step 7: install Rosetta Relaxation
+#### Step 7: install Rosetta Relaxation
 We will use Rosetta Relaxation in the DAQ-Refine final part, so please refer to the [Rosetta](https://www.rosettacommons.org/software/license-and-download) for furture installation.
 
 
-## Usage
-### 1. Command parameters
+#### Usage
+##### 1. Command parameters
 ```bash
 usage: python3 main.py [-h] [--log_folder_path=LOG_FOLDER_PATH] [--ip_folder_path=IP_FOLDER_PATH] [--op_folder_path=OP_FOLDER_PATH] [--root_run_dir=ROOT_RUN_DIR] [--resolution=RESOLUTION] [--job_id=JOB_ID] [--input_map=INPUT_MAP_PATH] [--pdb_file_path=PDB_FILE_PATH] [--pdb_name=PDB_NAME] [--fasta_file_path=FASTA_FILE_PATH] [--align_strategy=ALIGN_STRATEGY("Manual alignment" or "Smith Waterman")] [--rosetta_pth=ROSETTA_PATH]
 
@@ -133,3 +134,10 @@ To commence with DAQ-Refine in Colab:
 
 - Click [here](https://colab.research.google.com/github/kiharalab/DAQ-Refine/blob/main/DAQ_Refine.ipynb) to open the Colab notebook.
 - Follow the instructions within the notebook to execute DAQ-Refine.
+
+
+### References:
+
+- [1] Terashi, G., Wang, X., Maddhuri Venkata Subramaniya, S. R., Tesmer, J. J., & Kihara, D. (2022). *Residue-wise local quality estimation for protein models from cryo-EM maps*. Nature Methods, 19(9), 1116-1125. [https://doi.org/10.1038/s41592-022-01574-4](https://www.nature.com/articles/s41592-022-01574-4)
+
+- [2] Terashi, G., Wang, X., & Kihara, D. (2023). *Protein model refinement for cryo-EM maps using AlphaFold2 and the DAQ score*. Acta Crystallographica Section D: Structural Biology, 79(1), 10-21. [https://doi.org/10.1107/S2059798322011676](https://doi.org/10.1107/S2059798322011676)
