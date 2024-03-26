@@ -4,7 +4,7 @@
 
 ## DAQ-refine: Refinement of Protein Structures Utilizing DAQ-score and ColabFold
 
-DAQ-Refine leverages the power of DAQ-score and ColabFold for the refinement of protein structures derived from cryo-electron microscopy (cryo-EM) maps. This tool aims to enhance the accuracy and reliability of protein model predictions by providing a comprehensive residue-wise local quality estimation.
+DAQ-Refine utilizes DAQ-score and ColabFold to refine protein structures from cryo-EM maps, aiming to improve prediction accuracy and reliability through detailed residue-wise quality assessment.
 
 ## Table of Contents
 - [Getting Started with DAQ-Refine](#section-1)
