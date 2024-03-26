@@ -102,7 +102,17 @@ We will use Rosetta Relaxation in the DAQ-Refine final part, so please refer to 
 ## Usage
 ### 1. Command parameters
 ```bash
-usage: python3 main.py
+usage: python3 main.py [-h] [--log_folder_path=LOG_FOLDER_PATH] [--ip_folder_path=IP_FOLDER_PATH] [--op_folder_path=OP_FOLDER_PATH] [--root_run_dir=ROOT_RUN_DIR] [--resolution=RESOLUTION] [--job_id=JOB_ID] [--input_map=INPUT_MAP_PATH] [--pdb_file_path=PDB_FILE_PATH] [--pdb_name=PDB_NAME] [--fasta_file_path=FASTA_FILE_PATH] [--align_strategy=ALIGN_STRATEGY("Manual alignment" or "Smith Waterman")]
+
+required arguments:
+  -h, --help               show this help message and exit
+  --log_folder_path        log files folder path
+  --ip_folder_path         folder path for sanitizing all input files
+  --op_folder_path         folder path for output files
+  --root_run_dir           root dir for both DAQ git repo and DAQ-Refine git repo
+  --input_map              input map path, use the .mrc format, default: input.mrc
+  --pdb_file_path          input PDB file path, default: input.pdb
+  --fasta_file_path        input fasta file path, default: input.fasta
 ```
 
 
