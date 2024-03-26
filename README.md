@@ -1,13 +1,17 @@
 # DAQ-Refine
 
+<img src="https://user-images.githubusercontent.com/50850224/184964587-79a4e08d-4edd-4ef8-b69b-dfa8fe3b4804.png" align="left" width="240">
 
-<img src="https://user-images.githubusercontent.com/50850224/184964587-79a4e08d-4edd-4ef8-b69b-dfa8fe3b4804.png" align="left" style="height:240px">
+## DAQ-refine: Refinement of Protein Structures Utilizing DAQ-score and ColabFold
 
-# DAQ-refine: Protein Structure refinement by DAQ-score and ColabFold
+DAQ-Refine leverages the power of DAQ-score and ColabFold for the refinement of protein structures derived from cryo-electron microscopy (cryo-EM) maps. This tool aims to enhance the accuracy and reliability of protein model predictions by providing a comprehensive residue-wise local quality estimation.
 
-## References:    
-[1][TTerashi, G., Wang, X., Maddhuri Venkata Subramaniya, S. R., Tesmer, J. J., & Kihara, D. (2022). Residue-wise local quality estimation for protein models from cryo-EM maps. Nature methods, 19(9), 1116-1125. https://doi.org/10.1038/s41592-022-01574-4](https://www.nature.com/articles/s41592-022-01574-4)   
-[2][Terashi, G., Wang, X., & Kihara, D. (2023). Protein model refinement for cryo-EM maps using AlphaFold2 and the DAQ score. Acta Crystallographica Section D: Structural Biology, 79(1), 10-21. https://doi.org/10.1107/S2059798322011676](https://doi.org/10.1107/S2059798322011676)
+### References:
+
+- [1] Terashi, G., Wang, X., Maddhuri Venkata Subramaniya, S. R., Tesmer, J. J., & Kihara, D. (2022). *Residue-wise local quality estimation for protein models from cryo-EM maps*. Nature Methods, 19(9), 1116-1125. [https://doi.org/10.1038/s41592-022-01574-4](https://www.nature.com/articles/s41592-022-01574-4)
+
+- [2] Terashi, G., Wang, X., & Kihara, D. (2023). *Protein model refinement for cryo-EM maps using AlphaFold2 and the DAQ score*. Acta Crystallographica Section D: Structural Biology, 79(1), 10-21. [https://doi.org/10.1107/S2059798322011676](https://doi.org/10.1107/S2059798322011676)
+
 
 ## Getting Started with DAQ-Refine
 
