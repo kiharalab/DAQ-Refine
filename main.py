@@ -77,7 +77,7 @@ def main(args):
     # Run daq score firstly
     daq_1st_file = args.op_folder_path+"daq_score_w9.pdb"
     if check_job_finished(daq_1st_file) == False:
-        command_line="bash %s/DAQ-Refine/run_daq.sh "%args.root_run_dir+str(input_map)+" "+str(pdb_file_path)+" "+str(args.op_folder_path)
+        command_line="bash %s/DAQ-Refine/run_daq.sh "%args.root_run_dir+str(input_map)+" "+str(pdb_file_path)+" "+str(args.op_folder_path) + " " + str(args.root_run_dir)
         os.system(command_line)
         wait_flag = wait_job(daq_1st_file,run_limit=run_limit)
         if wait_flag == 2:

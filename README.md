@@ -79,8 +79,8 @@ pip install .
 ```bash
 pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'
 pip install --upgrade dm-haiku
-ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python3.9/dist-packages/colabfold colabfold
-ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python3.9/dist-packages/alphafold alphafold
+ln -s /you/path/to/python/dist-packages/colabfold colabfold
+ln -s /you/path/to/python/dist-packages/alphafold alphafold
 sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py
 conda config --set auto_update_conda false
 conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 openmm=7.7.0 python='3.9' pdbfixer
