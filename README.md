@@ -45,10 +45,10 @@ pip install -r requirements.txt
 Note: Adjust the package versions according to your project's requirements.
 
 ### Step 3: Download and Set Up Maxit
-First, enter the DAQ-Refine repository you have installed and change to emweb branch.
+First, enter the DAQ-Refine repository you have installed and change to local branch.
 ```bash
 cd /your/path/to/DAQ-Refine
-git checkout emweb
+git checkout local
 ```
 
 Second, download the Maxit and compile it.
@@ -96,8 +96,13 @@ g++ -static -O3 -ffast-math -o MMalign MMalign.cpp
 ```
 
 ### Step 7: install Rosetta Relaxation
-```bash
+We will use Rosetta Relaxation in the DAQ-Refine final part, so please refer to the [Rosetta](https://www.rosettacommons.org/software/license-and-download) for furture installation
 
+
+## Usage
+### 1. Command parameters
+```bash
+usage: python3 main.py
 ```
 
 

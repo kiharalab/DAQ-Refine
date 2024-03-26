@@ -1,135 +1,138 @@
-
 import os
-import os.path
-import re
-import hashlib
-import random
 import sys
-import string
-import urllib.request
-import subprocess
-import fileinput
-import argparse
-import warnings
-import logging
-from Bio import BiopythonDeprecationWarning
-from pathlib import Path
-import matplotlib.pyplot as plt
-from colabfold.download import download_alphafold_params, default_data_dir
-from colabfold.utils import setup_logging
-from colabfold.batch import get_queries, run, set_model_type
-from colabfold.plot import plot_msa_v2
-from colabfold.colabfold import plot_protein
-import numpy as np
-import py3Dmol
-import glob
-from colabfold.colabfold import plot_plddt_legend
-from colabfold.colabfold import pymol_color_list, alphabet_list
-from IPython.display import display, HTML
-import base64
-from html import escape
-import torch
-import shutil
-from PIL import Image
-import logging
-from Bio.PDB import PDBParser, PDBIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from daqrefine import Daqrefine
+from utils.utils import *
+from utils.argparser import argparser
+
+def main(args):
+    try:
+        # Get input parameters from YAML file
+        input_map = args.input_map
+        input_map = refactor_path(input_map)
+        input_new_map = args.op_folder_path+"input_resize.mrc"
+        
+        # prepare sequence file
+        fasta_file_path = args.fasta_file_path
+        fasta_file_path = copy_file(fasta_file_path,args.op_folder_path+"input.fasta")
+        fasta_file_path = format_seq(fasta_file_path,args.op_folder_path+"input_format.fasta")
+
+        os.system("python3 reform.py %s %s"%(input_map,input_new_map))
+        input_map = input_new_map
+        pdb_file_path = args.pdb_file_path
+        pdb_name = args.pdb_name
+        pdb_file_path = copy_file(pdb_file_path,args.op_folder_path+"input.pdb")
+        pdb_file_path = correct_pdb_ids(pdb_file_path)
+
+        resolution = args.resolution
 
 
+        # Extract sequences from PDB file
+        pdb_sequences = extract_sequences_from_pdb(pdb_file_path)
 
-def search_files(directory, extension):
-    return [os.path.join(root, file)
-            for root, dirs, files in os.walk(directory)
-            for file in files if file.endswith(extension)]
+        # Parse the FASTA file to get the sequences
+        fasta_sequences,nonempty_sequence_length = parse_fasta_file(fasta_file_path)
+        
+        # if fasta_sequences is False:
+        #     print("Error: Sequence is too long, our GPU memory cannot handle it.")
+        #     exit()
+    except Exception as e:
+        print("Error: %s"%e)
+        print("Error: Incorrect source files")
+        exit()
+        
 
-def get_arguments():
-    parser = argparse.ArgumentParser(description='STEP-1: Input Protein Sequence and DAQ result file')
+    print("len(fasta_sequences): ",len(fasta_sequences))
+    print("len(pdb_sequences): ",len(pdb_sequences))
+    # print(fasta_sequences,pdb_sequences)
+    if len(fasta_sequences) < len(pdb_sequences):
+        print("Error: Mismatch in the number of chains between FASTA and PDB files, fasta length: %d, pdb length: %d"%(len(fasta_sequences),len(pdb_sequences)))
+        exit()
 
-    # Add arguments
-    parser.add_argument('--str_mode', type=str, default='strategy 2',
-                        help='Select the DAQ-refine strategy. Choices are Vanilla AF2, strategy 1, and strategy 2.')
-    
-    # MENSMMFISRSLRRPVTALNCNLQSVRTVIYLHKGPRINGLRRDPESYLRNPSGVLFTEVNAKECQDKVRSILQLPKYGINLSNELILQCLTHKSFAHGSKPYNEKLNLLGAQFLKLQTCIHSLKNGSPAESCENGQLSLQFSNLGTKFAKELTSKNTACTFVKLHNLGPFIFWKMRDPIKDGHINGETTIFASVLNAFIGAILSTNGSEKAAKFIQGSLLDKEDLHSLVNIANENVASAKAKISDKENKAFL
-    parser.add_argument('--query_sequence', type=str, default='',
-                        help='Input target protein sequence.',required=True)
+    align_strategy = args.align_strategy
+    job_id = args.job_id
 
-    parser.add_argument('--jobname', type=str, default='',
-                        help='Job name for the task.',required=True)
-    
-    parser.add_argument('--num_relax', type=int, default=0,
-                        help='Number of models to use.')
-    
-    parser.add_argument('--template_mode', type=str, default='none',
-                        help='Template mode: none, pdb70, or custom.')
-    
-    parser.add_argument('--pdb_input_path', type=str, default='',
-                        help='Path to the DAQ-score output file (if applicable).')
-    
-    parser.add_argument('--cust_msa_path', type=str, default='none',
-                        help='Path to the custom MSA file (if applicable).')
+    # Compare sequences and find the best match
+    matches = {}
+    try:
+        matches = find_best_match(pdb_sequences, fasta_sequences,align_strategy)
+    except Exception as e:
+        print("Error: %s"%e)
+        exit()
 
-    parser.add_argument('--input_path', type=str, default='',
-                        help='Path to the directory of the input files.',required=True)
+    chain_order_file = args.op_folder_path + 'chain_order.txt'
 
-    parser.add_argument('--output_path', type=str, default='',
-                        help='Path to the directory of the output files.',required=True)
+    with open(chain_order_file, 'w') as file:
+        for chain_id in matches.keys():
+            file.write(chain_id + '\n')
 
-    parser.add_argument('--resolution', type=str, default='3.43',
-                        help='Specify the resolution in the relaxation',required=True)
+    # Create directories and save the corresponding PDB structures
+    with open(pdb_file_path, 'r') as pdb_file:
+        pdb_lines = pdb_file.readlines()
 
-    args = parser.parse_args()
+    for chain_id, _ in pdb_sequences:
+        output_dir = create_directory_for_chain(chain_id,args.log_folder_path)
+        output_dir = create_directory_for_chain(chain_id,args.op_folder_path)  
+        write_pdb_for_chain(pdb_lines, chain_id, output_dir)
 
-    return args
+    run_limit = 3600*24*10
+    # Run daq score firstly
+    daq_1st_file = args.op_folder_path+"daq_score_w9.pdb"
+    if check_job_finished(daq_1st_file) == False:
+        command_line="bash %s/DAQ-Refine/run_daq.sh "%args.root_run_dir+str(input_map)+" "+str(pdb_file_path)+" "+str(args.op_folder_path)
+        os.system(command_line)
+        wait_flag = wait_job(daq_1st_file,run_limit=run_limit)
+        if wait_flag == 2:
+            print("Error: Time out or daq score failed")
+            exit()
 
-def main():
-    # Get arguments (this function needs to be implemented based on the original code)
-    args = get_arguments()
+    chain_num = len(pdb_sequences)
+    index = 1
+    # begin the work
+    for chain_id, (fasta_id, fasta_seq) in matches.items():
+        # time.sleep(10)
+        if fasta_seq == '' or fasta_seq is None:
+            print(f"Warning: Empty sequence found for chain_id {chain_id}")
+            index += 1
+            continue
+        chain_pdb_path = os.path.join('chain_' + chain_id, 'input.pdb')
+        chain_pdb_path = os.path.join(args.op_folder_path,chain_pdb_path)
+        if chain_pdb_path is None:
+            print(f"Warning: No matching pdb file found for chain_id {chain_id}")
+            index += 1
+            continue  # Skip this chain if no matching pdb file is found
+        # Loop to process each chain
+        if not os.path.exists(chain_pdb_path):
+            print("Dismatch in chain id, fasta_id: %s"%chain_id)
+        sequence = preprocess_sequence(fasta_seq)
+        structure = chain_pdb_path
+        chain_name = f'chain_' + chain_id
+        # Begin the processing of the chain
+        print("Processing chain %s, index %d/%d"%(chain_id,index,chain_num))
+        check_file = args.op_folder_path+chain_name + "/done.out"
+        fail_file = args.op_folder_path+chain_name + "/fail.out"
+        log_file = args.log_folder_path + "/stdout.log"
+        isfinished = check_job_finished(check_file)
+        if isfinished:
+            print("Chain %s already finished"%chain_id)
+            index += 1
+            continue
+        command_line="bash %s/algorithms/DAQ-Refine/run_single_chain.sh "%args.root_run_dir+str(resolution)+" "+str(job_id)+" "+str(chain_id)+" "+str(args.ip_folder_path)+" "+str(args.op_folder_path)+" "+str(input_map)+" "+str(structure) + " " + str(sequence) + " " + str(args.root_run_dir)
+        # print(command_line)
+        os.system(command_line)
 
-    # run s1
-    print("INFO: STEP-1: Running strategy 1")
-    args.str_mode = 'strategy 1'
+        wait_flag = wait_job(check_file,fail_file,log_file,run_limit=run_limit)
+        print(wait_flag)
 
-    s1 = Daqrefine(
-        args=args
-    )
-    # clean up the directory
-    s1.clean_up(args)
-    # run the s1 modeling
-    ret = s1.run_modeling()
-    if ret == 2:
-        with open("%s/daqrefine_status.out"%args.output_path,'w') as wfile:
-            wfile.write("%s\n"%ret)
-        return 2
+        # Copy the log and script files to the output folder
+        copy_log_and_script(args.log_folder_path,args.log_folder_path+chain_name)
 
-    # run s2
-    # run vanilla alphafold to get msa file
-    print("INFO: STEP-2: Running Vanilla AF2")
-    vanilla_af2_result = None
-    args.str_mode = 'Vanilla AF2'
-    vanilla_af2_result = Daqrefine(
-        args=args
-    )
-    # run vanilla alphafold modeling
-    vanilla_af2_result.run_modeling()
+        if wait_flag == 2:
+            print("Error: Time out or chain %s failed"%chain_id)
+            exit()
+        index += 1
 
-    print("STEP-3: Running strategy 2")
-    args.str_mode = 'strategy 2'
-    a3m_files = search_files(vanilla_af2_result.result_dir, '.a3m')
-    args.cust_msa_path = a3m_files[0]
-
-    s2 = Daqrefine(
-        args=args
-    )
-    
-    # run the s2 modeling process
-    s2.run_modeling()
-    with open("%s/daqrefine_status.out"%args.output_path,'w') as wfile:
-        wfile.write("0\n")
-    return 0
-
+    os.system("python3 merge_daqrefine.py %s %s"%(args.op_folder_path,chain_order_file))
 
 if __name__ == '__main__':
-    ret = main()
+    args = argparser()
+    main(args)
 

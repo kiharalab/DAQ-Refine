@@ -88,13 +88,15 @@ class Daqrefine:
         # envrionment variables
         from sys import version_info
         self.python_version = f"{version_info.major}.{version_info.minor}"
-        self.emweb_path = "/bio/kihara-web/www/em/emweb-jobscheduler"
-        self.emweb_daqrefine_path = os.path.join(self.emweb_path,"algorithms/DAQ-Refine")
-        self.emweb_daq_path = os.path.join(self.emweb_path,"algorithms/DAQ")
+        # self.emweb_path = "/bio/kihara-web/www/em/emweb-jobscheduler"
+        self.emweb_path = args.emweb_path
+        self.emweb_daqrefine_path = os.path.join(self.emweb_path,"/DAQ-Refine")
+        self.emweb_daq_path = os.path.join(self.emweb_path,"/DAQ")
         self.mmalign_path = os.path.join(self.emweb_daqrefine_path,"MMalign")
         
         self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
         self.maxit_path = os.path.join(self.RCSBROOT,"bin/maxit")
+        self.python_path = sys.executable
 
         # initialize these parameters in step-1
         self.daq_file = ''
@@ -282,7 +284,8 @@ class Daqrefine:
                 return 2
 
             try:
-                subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.output_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
+                # subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.output_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
+                subprocess.run([self.maxit_path, "-input", self.output_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
                 self.daq_file = self.output_path+'/1tmp.cif'
             except subprocess.CalledProcessError as e:
                 print(f"Maxit subprocess failed: {e}")
@@ -569,6 +572,7 @@ class Daqrefine:
         USE_TEMPLATES = self.use_templates
         PYTHON_VERSION = self.python_version
 
+
         def is_python_module_installed(module_name):
             try:
                 subprocess.check_call([f"python{PYTHON_VERSION}", "-c", f"import {module_name}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -593,14 +597,17 @@ class Daqrefine:
             except subprocess.CalledProcessError:
                 return False
 
-        set_working_directory('/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine')
+        # set_working_directory('/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine')
+        set_working_directory(self.emweb_daqrefine_path)
 
         if not is_python_module_installed("colabfold"):
             print("installing colabfold...")
             os.system("pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'")
             os.system("pip install --upgrade dm-haiku")
-            os.system(f"ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/colabfold colabfold")
-            os.system(f"ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/alphafold alphafold")
+            # os.system(f"ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/colabfold colabfold")
+            os.system(f"ln -s {self.python_path}{PYTHON_VERSION}/dist-packages/colabfold colabfold")
+            # os.system(f"ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/alphafold alphafold")
+            os.system(f"ln -s {self.python_path}{PYTHON_VERSION}/dist-packages/alphafold alphafold")
             # patch for jax > 0.3.25
             os.system("sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py")
 
@@ -660,8 +667,10 @@ class Daqrefine:
 
         # For some reason we need that to get pdbfixer to import
         # /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python3.8/site-packages
-        if self.use_amber and f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/" not in sys.path:
-            sys.path.insert(0, f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/")
+        # if self.use_amber and f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/" not in sys.path:
+            # sys.path.insert(0, f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/")
+        if self.use_amber and f"{self.python_path}{self.python_version}/site-packages/" not in sys.path:
+            sys.path.insert(0, f"{self.python_path}{self.python_version}/site-packages/")
 
 
 
