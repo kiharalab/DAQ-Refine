@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Step 1: Create and activate a new Conda environment
-echo "Creating and activating the Conda environment..."
-conda create -n daq_refine python=3.9 -y
-conda activate daq_refine
-
 # Assuming you've navigated to the DAQ-Refine directory before running the script
 # Step 2: Install Python Dependencies
 echo "Switching to local branch and installing Python dependencies..."
