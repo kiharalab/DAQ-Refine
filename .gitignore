@@ -1,3 +1,6 @@
 .ipynb*
 maxit*
 biopython
+MMalign*
+alphafold
+colabfold
