@@ -58,58 +58,18 @@ Switch to the DAQ-Refine local branch and install the required Python packages i
 ```bash
 cd /your/path/to/DAQ-Refine
 git checkout local
-pip install -r requirements.txt
+chmode +x install_dependency.sh
+./install_dependency.sh
 ```
-*Note: Adjust the package versions according to your project's requirements.*
+*Note:*ß
 
-#### Step 3: Download and Set Up Maxit
-Download Maxit:
-```bash
-wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
-tar -xzf maxit-v11.100-prod-src.tar.gz
-cd maxit-v11.100-prod-src
-make
-./bin/DictToSdb -ddlFile ./data/ascii/mmcif_ddl.dic -dictFile ./data/ascii/mmcif_pdbx.dic -dictSdbFile mmcif_pdbx.sdb
-mv mmcif_pdbx.sdb ./data/binary
-rm -f ./bin/DictToSdb ./bin/cif2bin ./bin/connect_main
-if [ -e ./mmcif_pdbx.dic-parser.log ]; then
-    rm -rf ./mmcif_pdbx.dic-parser.log;
-fi
-```
-*Note: You may need to install additional dependencies like gcc, make, bison, flex, and csh using your system's package manager (e.g., apt for Ubuntu/Debian or yum for CentOS/RedHat).*
+- *Adjust the package versions according to your project's requirements.*
+- *This script assumes you're in the DAQ-Refine directory to start with.*
+- *Adjust paths and commands as necessary, especially if paths differ on your system or if additional configuration is needed.*
+- *You may need to install additional dependencies like gcc, make, bison, flex, and csh using your system's package manager (e.g., apt for Ubuntu/Debian or yum for CentOS/RedHat).*
+- *TensorFlow and CUDA configurations may present compatibility issues within your local environment. For comprehensive guidance and resolution strategies, we recommend consulting the official documentation available on their respective websites.*
 
-#### Step 4: install Biopython
-Navigate to your preferred installation path and install Biopython:
-```bash
-cd /your/path/to/install/biopython
-git clone https://github.com/biopython/biopython
-cd biopython
-pip install .
-```
-
-#### Step 5: install Alphafold/MSA dependencies
-Install necessary dependencies for Alphafold and MSA:
-```bash
-pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'
-pip install --upgrade dm-haiku
-ln -s /you/path/to/python/dist-packages/colabfold colabfold
-ln -s /you/path/to/python/dist-packages/alphafold alphafold
-sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py
-conda config --set auto_update_conda false
-conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 openmm=7.7.0 python='3.9' pdbfixer
-conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 python='3.9'
-conda install -y -c conda-forge openmm=7.7.0 python='3.9' pdbfixer
-```
-
-#### Step 6: install MMalign
-Download and compile MMalign in your DAQ-Refine directory:
-```bash
-cd /your/path/to/DAQ-Refine
-wget https://zhanggroup.org/MM-align/bin/module/MMalign.cpp
-g++ -static -O3 -ffast-math -o MMalign MMalign.cpp
-```
-
-#### Step 7: install Rosetta Relaxation
+#### Step 3: install Rosetta Relaxation
 We will use Rosetta Relaxation in the DAQ-Refine final part, so please refer to the [Rosetta](https://www.rosettacommons.org/software/license-and-download) for furture installation.
 
 
