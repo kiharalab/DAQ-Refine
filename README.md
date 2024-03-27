@@ -9,11 +9,7 @@ DAQ-Refine utilizes DAQ-score and ColabFold to refine protein structures from cr
 ## Table of Contents
 - [Getting Started with DAQ-Refine](#getting-started-with-daq-refine)
 - [DAQ-Refine Comprehensive Guide](#daq-refine-comprehensive-guide)
-<<<<<<< HEAD
-  - [Local Version Instructions](#llocal-version-instructions)
-=======
   - [Source Code Instructions](#source-code-instructions)
->>>>>>> ac29414c36a434c8de96eb08de7979afd67bbb6d
   - [Colab Instructions](#colab-instructions)
 - [References](#references)
 
