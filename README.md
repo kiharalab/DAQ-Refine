@@ -49,18 +49,18 @@ conda activate daq_refine
 ```
 
 #### Step 2: Install Python Dependencies
-Install the required Python packages in your Conda environment:
+Switch to the DAQ-Refine local branch and install the required Python packages in your Conda environment:
 
 ```bash
+cd /your/path/to/DAQ-Refine
+git checkout local
 pip install -r requirements.txt
 ```
 *Note: Adjust the package versions according to your project's requirements.*
 
 #### Step 3: Download and Set Up Maxit
-Switch to the DAQ-Refine local branch and download Maxit:
+Download Maxit:
 ```bash
-cd /your/path/to/DAQ-Refine
-git checkout local
 wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
 tar -xzf maxit-v11.100-prod-src.tar.gz
 cd maxit-v11.100-prod-src
