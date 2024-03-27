@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Assuming you've navigated to the DAQ-Refine directory before running the script
-# Step 2: Install Python Dependencies
+# Step 1: Install Python Dependencies
 echo "Switching to local branch and installing Python dependencies..."
 git checkout local
 pip install -r requirements.txt
 
-# Step 3: Download and Set Up Maxit
+# Step 2: Download and Set Up Maxit
 echo "Downloading and setting up Maxit..."
 wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
 tar -xzf maxit-v11.100-prod-src.tar.gz
@@ -20,14 +20,14 @@ if [ -e ./mmcif_pdbx.dic-parser.log ]; then
 fi
 cd ..
 
-# Step 4: Install Biopython
+# Step 3: Install Biopython
 echo "Installing Biopython..."
 git clone https://github.com/biopython/biopython
 cd biopython
 pip install .
 cd ..
 
-# Step 5: Install Alphafold/MSA dependencies
+# Step 4: Install Alphafold/MSA dependencies
 echo "Installing Alphafold/MSA dependencies..."
 pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'
 pip install --upgrade dm-haiku
@@ -37,7 +37,7 @@ sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weig
 conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 openmm=7.7.0 python='3.9' pdbfixer
 conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 python='3.9'
 
-# Step 6: Install MMalign
+# Step 5: Install MMalign
 echo "Downloading and compiling MMalign..."
 wget https://zhanggroup.org/MM-align/bin/module/MMalign.cpp
 g++ -static -O3 -ffast-math -o MMalign MMalign.cpp
