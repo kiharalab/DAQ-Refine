@@ -9,7 +9,11 @@ DAQ-Refine utilizes DAQ-score and ColabFold to refine protein structures from cr
 ## Table of Contents
 - [Getting Started with DAQ-Refine](#getting-started-with-daq-refine)
 - [DAQ-Refine Comprehensive Guide](#daq-refine-comprehensive-guide)
+<<<<<<< HEAD
   - [Local Version Instructions](#llocal-version-instructions)
+=======
+  - [Source Code Instructions](#source-code-instructions)
+>>>>>>> ac29414c36a434c8de96eb08de7979afd67bbb6d
   - [Colab Instructions](#colab-instructions)
 - [References](#references)
 
@@ -33,7 +37,7 @@ We also offer a Google Colab notebook for users who prefer an interactive, web-b
 
 ## DAQ-Refine Comprehensive Guide
 
-### **Local Version Instructions**
+### **Source Code Instructions**
 
 #### Local Environment Setup with Conda
 
@@ -49,18 +53,18 @@ conda activate daq_refine
 ```
 
 #### Step 2: Install Python Dependencies
-Install the required Python packages in your Conda environment:
+Switch to the DAQ-Refine local branch and install the required Python packages in your Conda environment:
 
 ```bash
+cd /your/path/to/DAQ-Refine
+git checkout local
 pip install -r requirements.txt
 ```
 *Note: Adjust the package versions according to your project's requirements.*
 
 #### Step 3: Download and Set Up Maxit
-Switch to the DAQ-Refine local branch and download Maxit:
+Download Maxit:
 ```bash
-cd /your/path/to/DAQ-Refine
-git checkout local
 wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
 tar -xzf maxit-v11.100-prod-src.tar.gz
 cd maxit-v11.100-prod-src
