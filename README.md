@@ -57,7 +57,7 @@ git checkout local
 chmode +x install_dependency.sh
 ./install_dependency.sh
 ```
-*Note:*ß
+*Note:*
 
 - *Adjust the package versions according to your project's requirements.*
 - *This script assumes you're in the DAQ-Refine directory to start with.*
