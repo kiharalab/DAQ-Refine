@@ -79,10 +79,10 @@ def main(args):
     if check_job_finished(daq_1st_file) == False:
         command_line="bash %s/DAQ-Refine/run_daq.sh "%args.root_run_dir+str(input_map)+" "+str(pdb_file_path)+" "+str(args.op_folder_path) + " " + str(args.root_run_dir)
         os.system(command_line)
-        wait_flag = wait_job(daq_1st_file,run_limit=run_limit)
-        if wait_flag == 2:
-            print("Error: Time out or daq score failed")
-            exit()
+        # wait_flag = wait_job(daq_1st_file,run_limit=run_limit)
+        # if wait_flag == 2:
+        #     print("Error: Time out or daq score failed")
+        #     exit()
 
     chain_num = len(pdb_sequences)
     index = 1
@@ -119,15 +119,15 @@ def main(args):
         # print(command_line)
         os.system(command_line)
 
-        wait_flag = wait_job(check_file,fail_file,log_file,run_limit=run_limit)
-        print(wait_flag)
+        # wait_flag = wait_job(check_file,fail_file,log_file,run_limit=run_limit)
+        # print(wait_flag)
 
         # Copy the log and script files to the output folder
         copy_log_and_script(args.log_folder_path,os.path.join(args.log_folder_path,chain_name))
 
-        if wait_flag == 2:
-            print("Error: Time out or chain %s failed"%chain_id)
-            exit()
+        # if wait_flag == 2:
+        #     print("Error: Time out or chain %s failed"%chain_id)
+        #     exit()
         index += 1
 
     os.system("python3 merge_daqrefine.py %s %s"%(args.op_folder_path,chain_order_file))
