@@ -35,6 +35,7 @@ eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; 
 # Use the specific python3 interpreter from cryoread environment
 # CRYOREAD_PYTHON="python3"
 CRYOREAD_PYTHON="/apps/miniconda38/envs/cryoread/bin/python3"
+DAQREFINE_PYTHON="/home/kihara/ling59/.conda/envs/daq_refine/bin/python3"
 
 # echo $@
 $CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output="${output_dir}/${chain_folder}" --window 9 --stride 2 --batch_size=64 --server 1  || { echo "main.py failed"; exit 1; }
@@ -51,7 +52,7 @@ echo "INFO: leave DAQ dir, enter DAQ_refine"
 
 # which python3
 pdb_input_path="${output_dir}/${chain_folder}/daq_score_w9.pdb"
-python3 single_chain.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_folder}" --output_path="${output_dir}/${chain_folder}" --query_sequence="$query_sequence" --emweb_path="$emweb_path"
+$DAQREFINE_PYTHON single_chain.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_folder}" --output_path="${output_dir}/${chain_folder}" --query_sequence="$query_sequence" --emweb_path="$emweb_path"
 status=$(cat ${output_dir}/${chain_folder}/daqrefine_status.out)
 echo "INFO: DAQ-refine status: $status"
 if [ $status -eq "2" ]; then
@@ -71,7 +72,6 @@ daqrefined_daq_dir="${output_dir}/${chain_folder}/DAQ"
 conda deactivate || { echo "Failed to deactivate Conda environment"; exit 1; }
 module load cryoread || { echo "Failed to load cryoread"; exit 1; }
 
-# $CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$daqrefined_structure --output=$daqrefined_output_dir --window 9 --stride 2 --batch_size=512  || { echo "main.py failed"; exit 1; }
 
 #  get the directories end with "s1", "s2", "af2" 
 directories=$(find $daqrefined_daq_dir -type d \( -name "*s1" -o -name "*s2" -o -name "*af2" \))
