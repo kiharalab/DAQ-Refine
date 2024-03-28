@@ -103,13 +103,11 @@ def mkdir(path):
 
 def copy_log_and_script(src_path, dest_path):
     """
-    Copies 'stdout.log', 'stderr.log', and 'slurm-job.sh' from the source path to the destination path.
-
     Parameters:
     src_path (str): The source directory path.
     dest_path (str): The destination directory path.
     """
-    files_to_copy = ['stdout.log', 'stderr.log', 'slurm-job.sh' , 'done.out','fail.out']
+    files_to_copy = ['done.out','fail.out']
 
     # Ensure destination directory exists
     if not os.path.exists(dest_path):

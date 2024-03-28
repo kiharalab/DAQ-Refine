@@ -15,7 +15,8 @@ def main(args):
         fasta_file_path = copy_file(fasta_file_path,os.path.join(args.op_folder_path,"input.fasta"))
         fasta_file_path = format_seq(fasta_file_path,os.path.join(args.op_folder_path,"input_format.fasta"))
 
-        os.system("python3 utils/reform.py %s %s"%(input_map,input_new_map))
+        # os.system("python3 utils/reform.py %s %s"%(input_map,input_new_map))
+        shutil.copy(input_map,input_new_map)
         input_map = input_new_map
         pdb_file_path = args.pdb_file_path
         pdb_name = args.pdb_name
