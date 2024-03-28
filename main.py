@@ -8,15 +8,15 @@ def main(args):
         # Get input parameters from YAML file
         input_map = args.input_map
         input_map = refactor_path(input_map)
-        input_new_map = os.path.join(args.op_folder_path,"input_resize.mrc")
+        # input_new_map = os.path.join(args.op_folder_path,"input_resize.mrc")
         
         # prepare sequence file
         fasta_file_path = args.fasta_file_path
         fasta_file_path = copy_file(fasta_file_path,os.path.join(args.op_folder_path,"input.fasta"))
         fasta_file_path = format_seq(fasta_file_path,os.path.join(args.op_folder_path,"input_format.fasta"))
 
-        os.system("python3 utils/reform.py %s %s"%(input_map,input_new_map))
-        input_map = input_new_map
+        # os.system("python3 utils/reform.py %s %s"%(input_map,input_new_map))
+        # input_map = input_new_map
         pdb_file_path = args.pdb_file_path
         pdb_name = args.pdb_name
         pdb_file_path = copy_file(pdb_file_path,os.path.join(args.op_folder_path,"input.pdb"))
