@@ -75,8 +75,8 @@ class Daqrefine:
         # envrionment variables
         from sys import version_info
         self.python_version = f"{version_info.major}.{version_info.minor}"
-        # self.emweb_path = "/bio/kihara-web/www/em/emweb-jobscheduler"
         self.emweb_path = args.emweb_path
+        print(f"EMWEB PATH: {self.emweb_path}")
         self.emweb_daqrefine_path = os.path.join(self.emweb_path,"/DAQ-Refine")
         self.emweb_daq_path = os.path.join(self.emweb_path,"/DAQ")
         self.mmalign_path = os.path.join(self.emweb_daqrefine_path,"MMalign")
@@ -271,7 +271,6 @@ class Daqrefine:
                 return 2
 
             try:
-                # subprocess.run(["/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src/bin/maxit", "-input", self.output_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
                 subprocess.run([self.maxit_path, "-input", self.output_path+"/1tmp.pdb", "-output", self.output_path+"/1tmp.cif", "-o", "1"], check=True)
                 self.daq_file = self.output_path+'/1tmp.cif'
             except subprocess.CalledProcessError as e:
