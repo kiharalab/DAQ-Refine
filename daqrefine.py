@@ -541,17 +541,6 @@ class Daqrefine:
         #@markdown -  if the save_to_google_drive option was selected, the result zip will be uploaded to your Google Drive
         self.dpi = 200 #@param {type:"integer"}
         #@markdown - set dpi for image resolution
-
-        # if save_to_google_drive:
-        #     from pydrive.drive import GoogleDrive
-        #     from pydrive.auth import GoogleAuth
-        #     from google.colab import auth
-        #     from oauth2client.client import GoogleCredentials
-        #     auth.authenticate_user()
-        #     gauth = GoogleAuth()
-        #     gauth.credentials = GoogleCredentials.get_application_default()
-        #     drive = GoogleDrive(gauth)
-        #     print("You are logged into Google Drive and are good to go!")
     
     def check_dependencies(self):
         USE_AMBER = self.use_amber
@@ -590,9 +579,7 @@ class Daqrefine:
             print("installing colabfold...")
             os.system("pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'")
             os.system("pip install --upgrade dm-haiku")
-            # os.system(f"ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/colabfold colabfold")
             os.system(f"ln -s {self.python_path}{PYTHON_VERSION}/dist-packages/colabfold colabfold")
-            # os.system(f"ln -s /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{PYTHON_VERSION}/dist-packages/alphafold alphafold")
             os.system(f"ln -s {self.python_path}{PYTHON_VERSION}/dist-packages/alphafold alphafold")
             # patch for jax > 0.3.25
             os.system("sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py")
@@ -652,9 +639,6 @@ class Daqrefine:
 
 
         # For some reason we need that to get pdbfixer to import
-        # /bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python3.8/site-packages
-        # if self.use_amber and f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/" not in sys.path:
-            # sys.path.insert(0, f"/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/lib/python{self.python_version}/site-packages/")
         if self.use_amber and f"{self.python_path}{self.python_version}/site-packages/" not in sys.path:
             sys.path.insert(0, f"{self.python_path}{self.python_version}/site-packages/")
 
@@ -715,8 +699,6 @@ class Daqrefine:
             input_features_callback=self.input_features_callback,
             save_recycles=self.save_recycles,
         )
-        # results_zip = f"{self.jobname}.result.zip"
-        # os.system(f"zip -r {results_zip} {self.result_dir}")
         return results
     
     def save_image(self, filename):
@@ -799,7 +781,6 @@ class Daqrefine:
         set_working_directory(input_dir)
         shutil.copy(os.path.join(self.emweb_daqrefine_path, "B_relax_density.xml"),"B_relax_density.xml")
         shutil.copy(os.path.join(self.output_path,"input_resize.mrc"),"MAP.mrc")
-        # ROSETTA3 = os.path.expanduser("/home/kihara/gterashi/bin/rosetta_bin_linux_2018.33.60351_bundle/main")
         ROSETTA3 = self.rosetta_path
         command = [
             os.path.join(ROSETTA3, "source/bin/rosetta_scripts.static.linuxgccrelease"),
