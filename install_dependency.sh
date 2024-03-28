@@ -30,7 +30,6 @@ cd ..
 # Step 4: Install Alphafold/MSA dependencies
 echo "Installing Alphafold/MSA dependencies..."
 pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'
-pip install --upgrade dm-haiku
 ln -s $(python -c 'import site; print(site.getsitepackages()[0])')/colabfold colabfold
 ln -s $(python -c 'import site; print(site.getsitepackages()[0])')/alphafold alphafold
 sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' $(python -c 'import site; print(site.getsitepackages()[0])')/alphafold/model/modules.py
