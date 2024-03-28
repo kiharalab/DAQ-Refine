@@ -83,6 +83,7 @@ class Daqrefine:
         
         self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
         self.maxit_path = os.path.join(self.RCSBROOT,"bin/maxit")
+        print(f"MAXIT PATH: {self.maxit_path}")
         self.python_path = sys.executable
 
         # initialize these parameters in step-1
