@@ -2,7 +2,7 @@ import os
 import sys
 import yaml
 import numpy as np
-from utils import check_and_merge_multiple_pdb_files
+from utils.utils import check_and_merge_multiple_pdb_files
 
 
 def merge_pdb_files_in_folders(base_path, output_file, chain_order_file):

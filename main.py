@@ -31,9 +31,6 @@ def main(args):
         # Parse the FASTA file to get the sequences
         fasta_sequences,nonempty_sequence_length = parse_fasta_file(fasta_file_path)
         
-        # if fasta_sequences is False:
-        #     print("Error: Sequence is too long, our GPU memory cannot handle it.")
-        #     exit()
     except Exception as e:
         print("Error: %s"%e)
         print("Error: Incorrect source files")
@@ -79,10 +76,6 @@ def main(args):
     if check_job_finished(daq_1st_file) == False:
         command_line="bash %s/DAQ-Refine/run_daq.sh "%args.root_run_dir+str(input_map)+" "+str(pdb_file_path)+" "+str(args.op_folder_path) + " " + str(args.root_run_dir)
         os.system(command_line)
-        # wait_flag = wait_job(daq_1st_file,run_limit=run_limit)
-        # if wait_flag == 2:
-        #     print("Error: Time out or daq score failed")
-        #     exit()
 
     chain_num = len(pdb_sequences)
     index = 1
@@ -108,8 +101,6 @@ def main(args):
         # Begin the processing of the chain
         print("Processing chain %s, index %d/%d"%(chain_id,index,chain_num))
         check_file = os.path.join(args.op_folder_path,chain_name,"done.out")
-        fail_file = os.path.join(args.op_folder_path,chain_name,"fail.out")
-        log_file = os.path.join(args.log_folder_path,"stdout.log")
         isfinished = check_job_finished(check_file)
         if isfinished:
             print("Chain %s already finished"%chain_id)
@@ -119,15 +110,8 @@ def main(args):
         # print(command_line)
         os.system(command_line)
 
-        # wait_flag = wait_job(check_file,fail_file,log_file,run_limit=run_limit)
-        # print(wait_flag)
-
         # Copy the log and script files to the output folder
         copy_log_and_script(args.log_folder_path,os.path.join(args.log_folder_path,chain_name))
-
-        # if wait_flag == 2:
-        #     print("Error: Time out or chain %s failed"%chain_id)
-        #     exit()
         index += 1
 
     os.system("python3 merge_daqrefine.py %s %s"%(args.op_folder_path,chain_order_file))

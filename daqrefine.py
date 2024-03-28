@@ -5,34 +5,20 @@ import re
 import hashlib
 import random
 import sys
-import string
-import urllib.request
 import subprocess
 import fileinput
-import argparse
 import warnings
-import logging
 from Bio import BiopythonDeprecationWarning
 from pathlib import Path
 import matplotlib.pyplot as plt
-from colabfold.download import download_alphafold_params, default_data_dir
+from colabfold.download import download_alphafold_params
 from colabfold.utils import setup_logging
 from colabfold.batch import get_queries, run, set_model_type
 from colabfold.plot import plot_msa_v2
 from colabfold.colabfold import plot_protein
-import numpy as np
-import py3Dmol
-import glob
-from colabfold.colabfold import plot_plddt_legend
-from colabfold.colabfold import pymol_color_list, alphabet_list
-from IPython.display import display, HTML
-import base64
-from html import escape
 import torch
 import shutil
-from PIL import Image
-import logging
-from Bio.PDB import PDBParser, PDBIO
+from Bio.PDB import PDBParser
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
