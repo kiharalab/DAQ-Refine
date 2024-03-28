@@ -36,7 +36,7 @@ eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; 
 # CRYOREAD_PYTHON="/apps/miniconda38/envs/cryoread/bin/python3"
 
 # echo $@
-python main.py --mode=0 -F=$map -P=$structure --output="${output_dir}/${chain_folder}" --window 9 --stride 2 --batch_size=64 --server 1  || { echo "main.py failed"; exit 1; }
+/apps/miniconda38/envs/cryoread/bin/python3 main.py --mode=0 -F=$map -P=$structure --output="${output_dir}/${chain_folder}" --window 9 --stride 2 --batch_size=64 --server 1  || { echo "main.py failed"; exit 1; }
 # $CRYOREAD_PYTHON writejobyml.py $output_dir  || { echo "writejobyml.py failed"; exit 1; }
 
 echo "INFO : STEP-0 DAQ Done"
