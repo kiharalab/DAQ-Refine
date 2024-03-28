@@ -81,6 +81,8 @@ def get_arguments():
     
     parser.add_argument('--emweb_path', type=str, default='.',help='root dir',required=True)
 
+    parser.add_argument('--rosetta_path', type=str, default='.',help='rosetta script path',required=True)
+
     args = parser.parse_args()
 
     return args

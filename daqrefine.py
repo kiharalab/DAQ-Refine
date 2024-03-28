@@ -84,6 +84,7 @@ class Daqrefine:
         self.str_mode = args.str_mode
         self.pdb_input_path = args.pdb_input_path
         self.resolution = args.resolution
+        self.rosetta_path = args.rosetta_path
 
         # envrionment variables
         from sys import version_info
@@ -813,7 +814,8 @@ class Daqrefine:
         set_working_directory(input_dir)
         shutil.copy(os.path.join(self.emweb_daqrefine_path, "B_relax_density.xml"),"B_relax_density.xml")
         shutil.copy(os.path.join(self.output_path,"input_resize.mrc"),"MAP.mrc")
-        ROSETTA3 = os.path.expanduser("/home/kihara/gterashi/bin/rosetta_bin_linux_2018.33.60351_bundle/main")
+        # ROSETTA3 = os.path.expanduser("/home/kihara/gterashi/bin/rosetta_bin_linux_2018.33.60351_bundle/main")
+        ROSETTA3 = self.rosetta_path
         command = [
             os.path.join(ROSETTA3, "source/bin/rosetta_scripts.static.linuxgccrelease"),
             "-database", os.path.join(ROSETTA3, "database/"),

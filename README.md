@@ -83,7 +83,7 @@ required arguments:
   --input_map              input map path, use the .mrc format, default: input.mrc
   --pdb_file_path          input PDB file path, default: input.pdb
   --fasta_file_path        input fasta file path, default: input.fasta
-  --rosetta_path           path for the Rosetta script
+  --rosetta_path           path for the Rosetta script(/your/path/to/rosetta_bin_system_version_bundle/main)
 ```
 
 ### **Colab Instructions**

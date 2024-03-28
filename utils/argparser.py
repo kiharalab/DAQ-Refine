@@ -16,6 +16,7 @@ def argparser():
     parser.add_argument("--pdb_name", default="UNKOWN", type=str, help="PDB name")
     parser.add_argument("--fasta_file_path", default="input.fasta", type=str, help="Fasta file path",required=True)
     parser.add_argument("--align_strategy", default="Manual alignment", type=str, help="Alignment strategy")
+    parser.add_argument("--rosetta_path", default="rosetta", type=str, help="Rosetta path")
     args = parser.parse_args()
     # params = vars(args)
     return args
