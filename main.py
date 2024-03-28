@@ -7,7 +7,7 @@ def main(args):
     try:
         # Get input parameters from YAML file
         input_map = args.input_map
-        input_map = refactor_path(input_map)
+        # input_map = refactor_path(input_map)
         input_new_map = os.path.join(args.op_folder_path,"input_resize.mrc")
         
         # prepare sequence file
