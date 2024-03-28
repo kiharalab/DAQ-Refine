@@ -107,7 +107,7 @@ def main(args):
             print("Chain %s already finished"%chain_id)
             index += 1
             continue
-        command_line="bash %s/DAQ-Refine/run_single_chain.sh "%args.root_run_dir+str(resolution)+" "+str(job_id)+" "+str(chain_id)+" "+str(args.ip_folder_path)+" "+str(args.op_folder_path)+" "+str(input_map)+" "+str(structure) + " " + str(sequence) + " " + str(args.root_run_dir)
+        command_line="bash %s/DAQ-Refine/run_single_chain.sh "%args.root_run_dir+str(resolution)+" "+str(job_id)+" "+str(chain_id)+" "+str(args.ip_folder_path)+" "+str(args.op_folder_path)+" "+str(input_map)+" "+str(structure) + " " + str(sequence) + " " + str(args.root_run_dir) + " " + str(args.rosetta_path)
         # print(command_line)
         os.system(command_line)
 

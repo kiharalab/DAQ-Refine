@@ -15,6 +15,7 @@ map=$6
 structure=$7
 query_sequence=$8
 emweb_path=$9
+rosetta_path=${10}
 
 echo "INFO : DAQ-refine started"
 
@@ -52,7 +53,7 @@ echo "INFO: leave DAQ dir, enter DAQ_refine"
 
 # which python3
 pdb_input_path="${output_dir}/${chain_folder}/daq_score_w9.pdb"
-$DAQREFINE_PYTHON single_chain.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_folder}" --output_path="${output_dir}/${chain_folder}" --query_sequence="$query_sequence" --emweb_path="$emweb_path"
+$DAQREFINE_PYTHON single_chain.py --resolution="$resolution" --jobname="$jobname" --pdb_input_path="$pdb_input_path" --input_path="${input_dir}/${chain_folder}" --output_path="${output_dir}/${chain_folder}" --query_sequence="$query_sequence" --emweb_path="$emweb_path" --rosetta_path=$rosetta_path || { echo "single_chain.py failed"; exit 1; }
 status=$(cat ${output_dir}/${chain_folder}/daqrefine_status.out)
 echo "INFO: DAQ-refine status: $status"
 if [ $status -eq "2" ]; then
