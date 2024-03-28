@@ -16,6 +16,6 @@ eval "$(conda shell.bash hook)"
 # Acitivate the conda enviroment
 # module load cryoread
 which python3
-/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/bin/python3 main.py --mode=0 -F=$map -P=$structure --output=$output_dir --window 9 --stride 2 --batch_size=64 --server 1
+/apps/miniconda38/envs/cryoread/bin/python3 main.py --mode=0 -F=$map -P=$structure --output=$output_dir --window 9 --stride 2 --batch_size=64 --server 1
 
 python3 $emweb_path/DAQ-Refine/utils/gen_score.py $output_dir
