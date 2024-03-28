@@ -8,18 +8,18 @@ def main(args):
         # Get input parameters from YAML file
         input_map = args.input_map
         input_map = refactor_path(input_map)
-        input_new_map = args.op_folder_path+"input_resize.mrc"
+        input_new_map = os.path.join(args.op_folder_path,"input_resize.mrc")
         
         # prepare sequence file
         fasta_file_path = args.fasta_file_path
-        fasta_file_path = copy_file(fasta_file_path,args.op_folder_path+"input.fasta")
-        fasta_file_path = format_seq(fasta_file_path,args.op_folder_path+"input_format.fasta")
+        fasta_file_path = copy_file(fasta_file_path,os.path.join(args.op_folder_path,"input.fasta"))
+        fasta_file_path = format_seq(fasta_file_path,os.path.join(args.op_folder_path,"input_format.fasta"))
 
-        os.system("python3 reform.py %s %s"%(input_map,input_new_map))
+        os.system("python3 utils/reform.py %s %s"%(input_map,input_new_map))
         input_map = input_new_map
         pdb_file_path = args.pdb_file_path
         pdb_name = args.pdb_name
-        pdb_file_path = copy_file(pdb_file_path,args.op_folder_path+"input.pdb")
+        pdb_file_path = copy_file(pdb_file_path,os.path.join(args.op_folder_path,"input.pdb"))
         pdb_file_path = correct_pdb_ids(pdb_file_path)
 
         resolution = args.resolution
@@ -58,7 +58,7 @@ def main(args):
         print("Error: %s"%e)
         exit()
 
-    chain_order_file = args.op_folder_path + 'chain_order.txt'
+    chain_order_file = os.path.join(args.op_folder_path, 'chain_order.txt')
 
     with open(chain_order_file, 'w') as file:
         for chain_id in matches.keys():
@@ -75,7 +75,7 @@ def main(args):
 
     run_limit = 3600*24*10
     # Run daq score firstly
-    daq_1st_file = args.op_folder_path+"daq_score_w9.pdb"
+    daq_1st_file = os.path.join(args.op_folder_path,"daq_score_w9.pdb")
     if check_job_finished(daq_1st_file) == False:
         command_line="bash %s/DAQ-Refine/run_daq.sh "%args.root_run_dir+str(input_map)+" "+str(pdb_file_path)+" "+str(args.op_folder_path) + " " + str(args.root_run_dir)
         os.system(command_line)
@@ -107,9 +107,9 @@ def main(args):
         chain_name = f'chain_' + chain_id
         # Begin the processing of the chain
         print("Processing chain %s, index %d/%d"%(chain_id,index,chain_num))
-        check_file = args.op_folder_path+chain_name + "/done.out"
-        fail_file = args.op_folder_path+chain_name + "/fail.out"
-        log_file = args.log_folder_path + "/stdout.log"
+        check_file = os.path.join(args.op_folder_path,chain_name,"done.out")
+        fail_file = os.path.join(args.op_folder_path,chain_name,"fail.out")
+        log_file = os.path.join(args.log_folder_path,"stdout.log")
         isfinished = check_job_finished(check_file)
         if isfinished:
             print("Chain %s already finished"%chain_id)
@@ -123,7 +123,7 @@ def main(args):
         print(wait_flag)
 
         # Copy the log and script files to the output folder
-        copy_log_and_script(args.log_folder_path,args.log_folder_path+chain_name)
+        copy_log_and_script(args.log_folder_path,os.path.join(args.log_folder_path,chain_name))
 
         if wait_flag == 2:
             print("Error: Time out or chain %s failed"%chain_id)
