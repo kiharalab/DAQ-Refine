@@ -62,7 +62,7 @@ chmode +x install_dependency.sh
 - *Adjust the package versions according to your project's requirements.*
 - *This script assumes you're in the DAQ-Refine directory to start with.*
 - *Adjust paths and commands as necessary, especially if paths differ on your system or if additional configuration is needed.*
-- *You may need to install additional dependencies like gcc, make, bison, flex, and csh using your system's package manager (e.g., apt for Ubuntu/Debian or yum for CentOS/RedHat).*
+- *You may need to install additional dependencies like pytorch, CUDA, gcc, make, bison, flex, and csh using your system's package manager (e.g., apt for Ubuntu/Debian or yum for CentOS/RedHat).*
 - *TensorFlow and CUDA configurations may present compatibility issues within your local environment. For comprehensive guidance and resolution strategies, we recommend consulting the official documentation available on their respective websites.*
 
 #### Step 3: install Rosetta Relaxation
@@ -83,7 +83,7 @@ required arguments:
   --input_map              input map path, use the .mrc format, default: input.mrc
   --pdb_file_path          input PDB file path, default: input.pdb
   --fasta_file_path        input fasta file path, default: input.fasta
-  --rosetta_path           path for the Rosetta script
+  --rosetta_path           path for the Rosetta script(/your/path/to/rosetta_bin_system_version_bundle/main)
 ```
 
 ### **Colab Instructions**
