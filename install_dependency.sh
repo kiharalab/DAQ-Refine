@@ -22,10 +22,7 @@ cd ..
 
 # Step 3: Install Biopython
 echo "Installing Biopython..."
-git clone https://github.com/biopython/biopython
-cd biopython
-pip install .
-cd ..
+pip install biopython
 
 # Step 4: Install Alphafold/MSA dependencies
 echo "Installing Alphafold/MSA dependencies..."
@@ -38,7 +35,7 @@ conda install -y -c conda-forge -c bioconda kalign2=2.04 hhsuite=3.3.0 python='3
 
 # Step 5: Install MMalign
 echo "Downloading and compiling MMalign..."
-wget https://zhanggroup.org/MM-align/bin/module/MMalign.cpp
+wget https://zhanglab.comp.nus.edu.sg/MM-align/bin/module/MMalign.cpp
 g++ -static -O3 -ffast-math -o MMalign MMalign.cpp
 
 echo "Installation completed."

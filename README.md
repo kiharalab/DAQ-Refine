@@ -44,7 +44,7 @@ This section guides you through creating a Conda environment for DAQ-Refine, inc
 Create and activate a new Conda environment:
 
 ```bash
-conda create -n daq_refine python=3.9
+conda create -n daq_refine python=3.10
 conda activate daq_refine
 ```
 
@@ -54,7 +54,7 @@ Switch to the DAQ-Refine local branch and install the required Python packages i
 ```bash
 cd /your/path/to/DAQ-Refine
 git checkout local
-chmode +x install_dependency.sh
+chmod a+x install_dependency.sh
 ./install_dependency.sh
 ```
 *Note:*
@@ -64,6 +64,7 @@ chmode +x install_dependency.sh
 - *Adjust paths and commands as necessary, especially if paths differ on your system or if additional configuration is needed.*
 - *You may need to install additional dependencies like pytorch, CUDA, gcc, make, bison, flex, Julia and csh using your system's package manager (e.g., apt for Ubuntu/Debian or yum for CentOS/RedHat).*
 - *TensorFlow and CUDA configurations may present compatibility issues within your local environment. For comprehensive guidance and resolution strategies, we recommend consulting the official documentation available on their respective websites.*
+- *MacOS may have conflit when compiling MMalign.cpp, try to compile with clang++ and make modifications if needed.
 
 #### Step 3: install Rosetta Relaxation
 We will use Rosetta Relaxation in the DAQ-Refine final part, so please refer to the [Rosetta](https://www.rosettacommons.org/software/license-and-download) for furture installation.

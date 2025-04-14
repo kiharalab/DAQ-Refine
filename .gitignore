@@ -4,3 +4,5 @@ biopython
 MMalign*
 alphafold
 colabfold
+__pycache__
+utils/julia_local

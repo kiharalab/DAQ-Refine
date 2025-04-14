@@ -21,6 +21,9 @@ echo "INFO : DAQ-refine started"
 
 echo "INFO : STEP-0 DAQ started"
 
+new_map="${output_dir}/input_resize.mrc"
+python3 utils/reform.py $map $new_map
+
 cd "$emweb_path/DAQ" || { echo "Failed to change directory"; exit 1; }
 
 chain_folder="chain_${chain_id}"
