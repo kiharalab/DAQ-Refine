@@ -81,8 +81,8 @@ class Daqrefine:
         self.emweb_daq_path = os.path.join(self.emweb_path,"DAQ")
         self.mmalign_path = os.path.join(self.emweb_daqrefine_path,"MMalign")
         
-        # self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
-        self.RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
+        self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
+        # self.RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
         self.maxit_path = os.path.join(self.RCSBROOT,"bin/maxit")
         # print(f"MAXIT PATH: {self.maxit_path}")
         self.python_path = sys.executable

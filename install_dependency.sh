@@ -11,10 +11,11 @@ echo "Downloading and setting up Maxit..."
 wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
 tar -xzf maxit-v11.100-prod-src.tar.gz
 cd maxit-v11.100-prod-src
+sudo apt-get install csh
 conda install -c conda-forge bison flex bash-completion
-# ls binary.csh
-make
-# csh binary.csh
+ls binary.csh
+make -j`nproc` binary
+csh binary.csh
 ./bin/DictToSdb -ddlFile ./data/ascii/mmcif_ddl.dic -dictFile ./data/ascii/mmcif_pdbx.dic -dictSdbFile mmcif_pdbx.sdb
 mv mmcif_pdbx.sdb ./data/binary
 rm -f ./bin/DictToSdb ./bin/cif2bin ./bin/connect_main
