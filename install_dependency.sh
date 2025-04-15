@@ -11,9 +11,12 @@ echo "Downloading and setting up Maxit..."
 wget https://sw-tools.rcsb.org/apps/MAXIT/maxit-v11.100-prod-src.tar.gz
 tar -xzf maxit-v11.100-prod-src.tar.gz
 cd maxit-v11.100-prod-src
+conda install -c conda-forge bison flex bash-completion
+# ls binary.csh
 make
+# csh binary.csh
 ./bin/DictToSdb -ddlFile ./data/ascii/mmcif_ddl.dic -dictFile ./data/ascii/mmcif_pdbx.dic -dictSdbFile mmcif_pdbx.sdb
-mv mmcif_pdbx.sdb ../data/binary
+mv mmcif_pdbx.sdb ./data/binary
 rm -f ./bin/DictToSdb ./bin/cif2bin ./bin/connect_main
 if [ -e ./mmcif_pdbx.dic-parser.log ]; then
     rm -rf ./mmcif_pdbx.dic-parser.log;

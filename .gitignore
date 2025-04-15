@@ -6,3 +6,4 @@ alphafold
 colabfold
 __pycache__
 utils/julia_local
+result/*

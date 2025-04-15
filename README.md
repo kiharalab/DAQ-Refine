@@ -66,7 +66,10 @@ chmod a+x install_dependency.sh
 - *TensorFlow and CUDA configurations may present compatibility issues within your local environment. For comprehensive guidance and resolution strategies, we recommend consulting the official documentation available on their respective websites.*
 - *MacOS may have conflit when compiling MMalign.cpp, try to compile with clang++ and make modifications if needed.
 
-#### Step 3: install Rosetta Relaxation
+#### Step 3: install 
+We will use Julia in the DAQ-Refine data preprocessing, so please refer to the [Julia](https://julialang.org/downloads/) for furture installation. Then change the Julia executable path in utils/reform.py.
+
+#### Step 4: install Rosetta Relaxation
 We will use Rosetta Relaxation in the DAQ-Refine final part, so please refer to the [Rosetta](https://www.rosettacommons.org/software/license-and-download) for furture installation.
 
 

@@ -21,8 +21,13 @@ echo "INFO : DAQ-refine started"
 
 echo "INFO : STEP-0 DAQ started"
 
+# Use the specific python3 interpreter from cryoread environment
+# CRYOREAD_PYTHON="python3"
+CRYOREAD_PYTHON="/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/bin/python"
+DAQREFINE_PYTHON="/bio/kihara-web/www/em/emweb-jobscheduler/conda_envs/daq_refine/bin/python"
+
 new_map="${output_dir}/input_resize.mrc"
-python3 utils/reform.py $map $new_map
+$DAQREFINE_PYTHON $emweb_path/DAQ-Refine/utils/reform.py $map $new_map
 
 cd "$emweb_path/DAQ" || { echo "Failed to change directory"; exit 1; }
 
@@ -30,13 +35,9 @@ chain_folder="chain_${chain_id}"
 echo "INFO: start DAQ-refine for chain ${chain_id}"
 eval "$(conda shell.bash hook)" || { echo "Failed to initialize Conda"; exit 1; }
 
-# Use the specific python3 interpreter from cryoread environment
-# CRYOREAD_PYTHON="python3"
-CRYOREAD_PYTHON="python3"
-DAQREFINE_PYTHON="python3"
 
 # echo $@
-$CRYOREAD_PYTHON main.py --mode=0 -F=$map -P=$structure --output="${output_dir}/${chain_folder}" --window 9 --stride 2 --batch_size=64 --server 1  || { echo "main.py failed"; exit 1; }
+$CRYOREAD_PYTHON main.py --mode=0 -F=$new_map -P=$structure --output="${output_dir}/${chain_folder}" --window 9 --stride 2 --batch_size=64 --server 1  || { echo "main.py failed"; exit 1; }
 
 echo "INFO : STEP-0 DAQ Done"
 

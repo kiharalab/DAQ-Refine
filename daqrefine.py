@@ -1,15 +1,15 @@
-
 import os
+import sys
 import os.path
 import re
 import hashlib
 import random
-import sys
 import subprocess
 import fileinput
 import warnings
 from Bio import BiopythonDeprecationWarning
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 from colabfold.download import download_alphafold_params
 from colabfold.utils import setup_logging
@@ -81,7 +81,8 @@ class Daqrefine:
         self.emweb_daq_path = os.path.join(self.emweb_path,"DAQ")
         self.mmalign_path = os.path.join(self.emweb_daqrefine_path,"MMalign")
         
-        self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
+        # self.RCSBROOT = os.path.join(self.emweb_daqrefine_path,"maxit-v11.100-prod-src")
+        self.RCSBROOT = "/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine/maxit-v11.100-prod-src"
         self.maxit_path = os.path.join(self.RCSBROOT,"bin/maxit")
         # print(f"MAXIT PATH: {self.maxit_path}")
         self.python_path = sys.executable
@@ -547,43 +548,74 @@ class Daqrefine:
         USE_AMBER = self.use_amber
         USE_TEMPLATES = self.use_templates
         PYTHON_VERSION = self.python_version
-
+        
+        print(f"DEBUG: Current Python version: {PYTHON_VERSION}")
+        print(f"DEBUG: Python path: {self.python_path}")
+        print(f"DEBUG: Current working directory: {os.getcwd()}")
+        print(f"DEBUG: CONDA_PREFIX: {os.environ.get('CONDA_PREFIX', 'Not set')}")
+        print(f"DEBUG: PATH: {os.environ.get('PATH', 'Not set')}")
 
         def is_python_module_installed(module_name):
+            print(f"DEBUG: Checking if module {module_name} is installed...")
             try:
-                subprocess.check_call([f"python{PYTHON_VERSION}", "-c", f"import {module_name}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                python_cmd = sys.executable
+                print(f"DEBUG: Using Python command: {python_cmd}")
+                subprocess.check_call([python_cmd, "-c", f"import {module_name}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                print(f"DEBUG: Module {module_name} is installed")
                 return True
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
+                print(f"DEBUG: Module {module_name} is not installed. Error: {e}")
+                return False
+            except Exception as e:
+                print(f"DEBUG: Unexpected error checking module {module_name}: {e}")
                 return False
         
         def is_conda_package_installed(package_name):
+            print(f"DEBUG: Checking if conda package {package_name} is installed...")
             try:
                 result = subprocess.check_output(["conda", "list", package_name], stderr=subprocess.STDOUT, text=True)
                 if package_name in result:
+                    print(f"DEBUG: Conda package {package_name} is installed")
                     return True
                 else:
+                    print(f"DEBUG: Conda package {package_name} is not installed")
                     return False
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
+                print(f"DEBUG: Error checking conda package {package_name}: {e}")
                 return False
 
         def is_conda_installed():
+            print("DEBUG: Checking if conda is installed...")
             try:
                 subprocess.check_call(["conda", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                print("DEBUG: Conda is installed")
                 return True
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
+                print(f"DEBUG: Conda is not installed. Error: {e}")
                 return False
 
-        # set_working_directory('/bio/kihara-web/www/em/emweb-jobscheduler/algorithms/DAQ-Refine')
         set_working_directory(self.emweb_daqrefine_path)
+        print(f"DEBUG: Changed working directory to: {os.getcwd()}")
 
         if not is_python_module_installed("colabfold"):
-            print("installing colabfold...")
-            os.system("pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'")
-            os.system("pip install --upgrade dm-haiku")
-            os.system(f"ln -s {self.python_path}{PYTHON_VERSION}/dist-packages/colabfold colabfold")
-            os.system(f"ln -s {self.python_path}{PYTHON_VERSION}/dist-packages/alphafold alphafold")
-            # patch for jax > 0.3.25
-            os.system("sed -i 's/weights = jax.nn.softmax(logits)/logits=jnp.clip(logits,-1e8,1e8);weights=jax.nn.softmax(logits)/g' alphafold/model/modules.py")
+            print("DEBUG: Installing colabfold...")
+            try:
+                os.system("pip install -q --no-warn-conflicts 'colabfold[alphafold-minus-jax] @ git+https://github.com/kiharalab/ColabFold'")
+                print("DEBUG: Installed colabfold")
+                os.system("pip install --upgrade dm-haiku")
+                print("DEBUG: Upgraded dm-haiku")
+                
+                conda_prefix = os.environ.get('CONDA_PREFIX', '')
+                print(f"DEBUG: CONDA_PREFIX: {conda_prefix}")
+                
+                if conda_prefix:
+                    print(f"DEBUG: Using conda environment path: {conda_prefix}/lib/python{PYTHON_VERSION}/site-packages/")
+                else:
+                    print(f"DEBUG: Using system Python path: {self.python_path}{PYTHON_VERSION}/dist-packages/")
+                
+                print("DEBUG: Applied jax patch")
+            except Exception as e:
+                print(f"DEBUG: Error during colabfold installation: {e}")
 
         if not is_conda_installed():
             print("installing conda...")
@@ -719,15 +751,15 @@ class Daqrefine:
     
     
     def align_structure(self,results):
+        if results is None:
+            print("WARNING: No prediction results available. Skipping structure alignment.")
+            return
+        
         self.color = "lDDT" #@param ["chain", "lDDT", "rainbow"]
         self.show_sidechains = False #@param {type:"boolean"}
         self.show_mainchains = False #@param {type:"boolean"}
 
-            
         self.rerun_daq_result_path = os.path.join(self.output_path,"DAQ")
-        # input_map = os.path.join(self.output_path,"input_resize.mrc")
-        # input_pdb = os.path.join(self.rerun_daq_result_path,"DAQ/input.pdb")
-
         set_working_directory(self.output_path)
 
         # mkdir DAQ
@@ -744,11 +776,9 @@ class Daqrefine:
             self.jobname_prefix = ".custom" if self.msa_mode == "custom" else ""
             self.pdb_filename = f"{self.result_dir}/{self.jobname}{self.jobname_prefix}_unrelaxed_{self.tag}.pdb"
 
-
-
             if not os.path.exists(self.pdb_filename):
                 print(f"File '{self.pdb_filename}' not found.")
-                exit(0)
+                continue
 
             if self.str_mode=="strategy 1":
                 temp_tag = self.tag + "_s1"
@@ -861,7 +891,7 @@ class Daqrefine:
             exit(1)
 
         try:
-            self.check_dependencies()
+            # self.check_dependencies()
             print("Install dependencies finished.")
         except Exception as e:
             print(f"Error in check_dependencies(): {e}")

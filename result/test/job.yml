@@ -1,3 +1,3 @@
 pdbfiles: merged_protein.pdb
-contour: 0.008277
+contour: 0.000000
 strings: DAQ-refine is a protocol using <a href='https://em.kiharalab.org/algorithm/daqscore'>DAQ score</a> to evaluate protein models from cryo-EM maps and employs a modified AlphaFold 2 for refining regions with potential errors.<br> The 3D model is colored by <a href='https://www.nature.com/articles/s41592-022-01574-4'>DAQ(AA) score</a> scaled from red (-1.0) to blue (1.0) with a 19 residues sliding window. Here blue indicates good score, while red indicates bad score from DAQ. <br>In MODEL1, it shows the original model, all modeled positions are colored by DAQ(AA) score. <br>In MODEL2, it shows the DAQ refined model, all modeled positions are colored by DAQ(AA) score. <br> If you encounter any questions for the scored structure, feel free to email dkihara@purdue.edu, gterashi@purdue.edu and wang3702@purdue.edu.

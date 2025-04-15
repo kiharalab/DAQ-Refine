@@ -1,5 +1,6 @@
 import os
 import sys
+
 from utils.utils import *
 from utils.argparser import argparser
 
@@ -115,7 +116,7 @@ def main(args):
         copy_log_and_script(args.log_folder_path,os.path.join(args.log_folder_path,chain_name))
         index += 1
 
-    os.system("python3 merge_daqrefine.py %s %s"%(args.op_folder_path,chain_order_file))
+    os.system("python3 %s/DAQ-Refine/merge_daqrefine.py %s %s"%(args.root_run_dir,args.op_folder_path,chain_order_file))
 
 if __name__ == '__main__':
     args = argparser()
